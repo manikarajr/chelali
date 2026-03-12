@@ -3,6 +3,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { NAV_ITEMS } from '../sidebar/sidebar.config';
 
+const BOTTOM_ROUTES = ['/customers', '/transactions', '/invoices'];
+
 @Component({
   selector: 'app-main-layout',
   standalone: true,
@@ -11,6 +13,11 @@ import { NAV_ITEMS } from '../sidebar/sidebar.config';
 })
 export class MainLayoutComponent {
   sidebarOpen = signal(false);
+  hamburgerOpen = signal(false);
   toggleSidebar() { this.sidebarOpen.update(v => !v); }
-  navItems = NAV_ITEMS;
+  toggleHamburger() { this.hamburgerOpen.update(v => !v); }
+  closeHamburger() { this.hamburgerOpen.set(false); }
+
+  bottomNavItems = NAV_ITEMS.filter(i => BOTTOM_ROUTES.includes(i.route));
+  hamburgerNavItems = NAV_ITEMS.filter(i => !BOTTOM_ROUTES.includes(i.route));
 }

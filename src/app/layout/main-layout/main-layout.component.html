@@ -19,13 +19,49 @@
     </main>
   </div>
 
+  <!-- Hamburger menu backdrop -->
+  @if (hamburgerOpen()) {
+    <div
+      class="lg:hidden fixed inset-0 z-40 bg-black/30"
+      (click)="closeHamburger()"
+    ></div>
+  }
+
+  <!-- Hamburger slide-up drawer -->
+  <div
+    class="lg:hidden fixed bottom-16 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-xl border-t border-gray-200 transition-transform duration-300 ease-in-out"
+    [class.translate-y-0]="hamburgerOpen()"
+    [class.translate-y-full]="!hamburgerOpen()"
+  >
+    <div class="px-4 pt-4 pb-2">
+      <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">More</p>
+      @for (item of hamburgerNavItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+          (click)="closeHamburger()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
+          </svg>
+          <span class="text-sm font-medium">{{ item.label }}</span>
+        </a>
+      }
+    </div>
+    <div class="h-safe-area-inset-bottom pb-2"></div>
+  </div>
+
   <!-- Mobile bottom navbar -->
   <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex">
-    @for (item of navItems; track item.route) {
+    @for (item of bottomNavItems; track item.route) {
       <a
         [routerLink]="item.route"
         routerLinkActive="text-blue-600"
-        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        [routerLinkActiveOptions]="{ exact: false }"
         class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-gray-500 hover:text-blue-600 transition-colors duration-150"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -35,5 +71,27 @@
         <span class="text-[10px] font-medium leading-none">{{ item.label }}</span>
       </a>
     }
+
+    <!-- Hamburger / More button -->
+    <button
+      type="button"
+      (click)="toggleHamburger()"
+      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors duration-150"
+      [class.text-blue-600]="hamburgerOpen()"
+      [class.text-gray-500]="!hamburgerOpen()"
+    >
+      @if (hamburgerOpen()) {
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-5 h-5 shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-5 h-5 shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      }
+      <span class="text-[10px] font-medium leading-none">More</span>
+    </button>
   </nav>
 </div>
