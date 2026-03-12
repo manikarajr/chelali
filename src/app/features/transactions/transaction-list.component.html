@@ -22,19 +22,51 @@
   <div class="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
 
-      <!-- Customer -->
-      <div class="flex flex-col gap-1 col-span-2 sm:col-span-1">
+      <!-- Customer search combobox -->
+      <div class="flex flex-col gap-1 col-span-2 sm:col-span-1 relative">
         <label class="text-xs font-medium text-gray-500 px-0.5">Customer</label>
-        <select
-          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          [ngModel]="filterCustomerId() ?? ''"
-          (ngModelChange)="filterCustomerId.set($event === '' ? null : +$event)"
-        >
-          <option value="">All Customers</option>
-          @for (c of customers(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search by phone or name…"
+            class="w-full rounded-lg border border-gray-300 bg-white pl-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngModel]="customerSearch()"
+            (ngModelChange)="customerSearch.set($event)"
+            (focus)="onCustomerSearchFocus()"
+            (blur)="onCustomerSearchBlur()"
+          />
+          @if (filterCustomerId() !== null) {
+            <button
+              type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              (mousedown)="$event.preventDefault(); selectCustomer(null)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
           }
-        </select>
+        </div>
+        @if (customerDropdownOpen()) {
+          <ul class="absolute z-20 top-full left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm">
+            <li
+              class="px-3 py-2 cursor-pointer text-gray-500 hover:bg-gray-50"
+              (mousedown)="$event.preventDefault(); selectCustomer(null)"
+            >All Customers</li>
+            @for (c of filteredCustomers(); track c.id) {
+              <li
+                class="px-3 py-2 cursor-pointer hover:bg-blue-50 flex flex-col"
+                (mousedown)="$event.preventDefault(); selectCustomer(c.id)"
+              >
+                <span class="font-medium text-gray-800">{{ c.name }}</span>
+                <span class="text-xs text-gray-400">{{ c.phone }}</span>
+              </li>
+            }
+            @if (filteredCustomers().length === 0) {
+              <li class="px-3 py-2 text-gray-400 italic">No customers found</li>
+            }
+          </ul>
+        }
       </div>
 
       <!-- Status -->

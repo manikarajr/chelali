@@ -27,6 +27,43 @@ export class TransactionListComponent {
   isConfirmSaveOpen = signal(false);
   pendingSaveData = signal<(Omit<Transaction, 'id'> & { id?: number }) | null>(null);
 
+  // Customer search combobox
+  customerSearch = signal('');
+  customerDropdownOpen = signal(false);
+
+  filteredCustomers = computed(() => {
+    const q = this.customerSearch().toLowerCase().trim();
+    if (!q) return this.customers();
+    return this.customers().filter(c =>
+      c.phone.includes(q) || c.name.toLowerCase().includes(q)
+    );
+  });
+
+  selectCustomer(id: number | null): void {
+    this.filterCustomerId.set(id);
+    if (id === null) {
+      this.customerSearch.set('');
+    } else {
+      const c = this.customers().find(x => x.id === id);
+      this.customerSearch.set(c ? `${c.name} — ${c.phone}` : '');
+    }
+    this.customerDropdownOpen.set(false);
+  }
+
+  onCustomerSearchFocus(): void {
+    this.customerSearch.set('');
+    this.filterCustomerId.set(null);
+    this.customerDropdownOpen.set(true);
+  }
+
+  onCustomerSearchBlur(): void {
+    // Delay so click on option fires first
+    setTimeout(() => {
+      if (this.filterCustomerId() === null) this.customerSearch.set('');
+      this.customerDropdownOpen.set(false);
+    }, 150);
+  }
+
   // Filter state
   filterCustomerId = signal<number | null>(null);
   filterStatus = signal<PaymentStatus | null>(null);
@@ -61,6 +98,7 @@ export class TransactionListComponent {
 
   clearFilters(): void {
     this.filterCustomerId.set(null);
+    this.customerSearch.set('');
     this.filterStatus.set(null);
     this.filterOutstanding.set(null);
     this.filterDateFrom.set('');

@@ -1,10 +1,11 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { NgClass, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { NgClass, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { ExpenseService } from '../../core/services/expense.service';
 import { CustomerService } from '../../core/services/customer.service';
+import * as XLSX from 'xlsx';
 
 type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
 
@@ -118,11 +119,86 @@ export class ReportsComponent {
     return this.customerService.getById(id)?.name ?? 'Unknown';
   }
 
-  exportPDF(): void {
-    window.print();
+  private formatDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  private formatCurrency(amount: number): string {
+    return '₹' + amount.toLocaleString('en-IN');
+  }
+
+  private periodLabel(): string {
+    if (this.filterType === 'monthly') {
+      const [y, m] = this.selectedMonth.split('-');
+      const date = new Date(Number(y), Number(m) - 1, 1);
+      return date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    }
+    return `${this.dateFrom || 'Start'} to ${this.dateTo || 'End'}`;
   }
 
   exportExcel(): void {
-    alert('Excel export: integrate a library like xlsx or sheetjs for production use.');
+    const wb = XLSX.utils.book_new();
+
+    // ── Sheet 1: Sales Summary ──
+    const salesRows = this.mappedSales().map(t => ({
+      'Date': this.formatDate(t.date),
+      'Customer': t.customerName,
+      'Qty (kg)': t.quantity,
+      'Total Amount': this.formatCurrency(t.totalAmount),
+      'Collected Amount': this.formatCurrency(t.paidAmount),
+      'Status': t.paymentStatus.charAt(0).toUpperCase() + t.paymentStatus.slice(1),
+    }));
+    const wsSales = XLSX.utils.json_to_sheet(salesRows);
+    XLSX.utils.book_append_sheet(wb, wsSales, 'Sales Summary');
+
+    // ── Sheet 2: Expense Summary ──
+    const expenseRows = this.filteredExpenseItems().map(e => ({
+      'Date': this.formatDate(e.date),
+      'Category': e.category.charAt(0).toUpperCase() + e.category.slice(1),
+      'Description': e.notes || '-',
+      'Amount': this.formatCurrency(e.amount),
+    }));
+    const wsExpense = XLSX.utils.json_to_sheet(expenseRows);
+    XLSX.utils.book_append_sheet(wb, wsExpense, 'Expense Summary');
+
+    // ── Sheet 3: Outstanding ──
+    const outstandingRows = this.customerOutstanding().map(c => ({
+      'Customer': c.name,
+      'Total Sales': this.formatCurrency(c.totalBilled),
+      'Collected': this.formatCurrency(c.paid),
+      'Outstanding Amount': this.formatCurrency(c.outstanding),
+    }));
+    const wsOutstanding = XLSX.utils.json_to_sheet(outstandingRows);
+    XLSX.utils.book_append_sheet(wb, wsOutstanding, 'Outstanding');
+
+    // ── Sheet 4: Profit Loss ──
+    const plRows = [
+      { 'Metric': 'Total Sales', 'Amount': this.formatCurrency(this.filteredSales()) },
+      { 'Metric': 'Total Expenses', 'Amount': this.formatCurrency(this.filteredExpenses()) },
+      { 'Metric': 'Total Outstanding', 'Amount': this.formatCurrency(this.totalOutstanding()) },
+      { 'Metric': 'Net Profit / Loss', 'Amount': this.formatCurrency(this.netProfit()) },
+    ];
+    const wsPL = XLSX.utils.json_to_sheet(plRows);
+    XLSX.utils.book_append_sheet(wb, wsPL, 'Profit Loss');
+
+    // ── Sheet 5: Detailed Sales ──
+    const detailedRows = this.mappedSales().map(t => ({
+      'Date': this.formatDate(t.date),
+      'Customer': t.customerName,
+      'Qty (kg)': t.quantity,
+      'Total Amount': this.formatCurrency(t.totalAmount),
+      'Collected Amount': this.formatCurrency(t.paidAmount),
+      'Outstanding Amount': this.formatCurrency(t.outstandingAmount),
+      'Status': t.paymentStatus.charAt(0).toUpperCase() + t.paymentStatus.slice(1),
+    }));
+    const wsDetailed = XLSX.utils.json_to_sheet(detailedRows);
+    XLSX.utils.book_append_sheet(wb, wsDetailed, 'Detailed Sales');
+
+    // ── Generate file name ──
+    const period = this.periodLabel().replace(/\s+/g, '_');
+    const fileName = `IcePlant_Report_${period}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
   }
 }
