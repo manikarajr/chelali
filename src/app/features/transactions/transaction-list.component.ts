@@ -15,19 +15,19 @@ import { TransactionFormComponent } from './transaction-form.component';
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Transactions</h2>
-          <p class="text-sm text-gray-500 mt-1">Ice purchase records</p>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Transactions</h2>
+          <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Ice purchase records</p>
         </div>
         <button
           (click)="openAdd()"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium
-                 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm font-medium
+                 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          New Transaction
+          <span class="hidden sm:inline">New Transaction</span>
         </button>
       </div>
 
@@ -35,7 +35,7 @@ import { TransactionFormComponent } from './transaction-form.component';
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <!-- Search -->
         <div class="p-4 border-b border-gray-100">
-          <div class="relative max-w-xs">
+          <div class="relative w-full sm:max-w-xs">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                  stroke="currentColor"
                  class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">

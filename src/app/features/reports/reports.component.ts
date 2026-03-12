@@ -14,47 +14,47 @@ type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Reports</h2>
-          <p class="text-sm text-gray-500 mt-1">Business analytics and summaries</p>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Reports</h2>
+          <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Business analytics and summaries</p>
         </div>
         <!-- Export Buttons -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 shrink-0">
           <button
             (click)="exportPDF()"
-            class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm
+            class="flex items-center gap-1.5 px-3 sm:px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm
                    font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-4 h-4 text-red-500">
+                 stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            Export PDF
+            <span class="hidden sm:inline">Export PDF</span>
           </button>
           <button
             (click)="exportExcel()"
-            class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm
+            class="flex items-center gap-1.5 px-3 sm:px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm
                    font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-4 h-4 text-green-600">
+                 stroke="currentColor" class="w-4 h-4 text-green-600 shrink-0">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
-            Export Excel
+            <span class="hidden sm:inline">Export Excel</span>
           </button>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-4 items-end">
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-end">
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Filter</label>
           <select
             [(ngModel)]="filterType"
-            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none
                    focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="monthly">Monthly</option>
@@ -97,19 +97,19 @@ type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Total Sales</p>
-          <p class="text-2xl font-bold text-gray-900">{{ filteredSales() | currency:'INR':'symbol':'1.0-0' }}</p>
+          <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ filteredSales() | currency:'INR':'symbol':'1.0-0' }}</p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Total Expenses</p>
-          <p class="text-2xl font-bold text-gray-900">{{ filteredExpenses() | currency:'INR':'symbol':'1.0-0' }}</p>
+          <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ filteredExpenses() | currency:'INR':'symbol':'1.0-0' }}</p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Outstanding</p>
-          <p class="text-2xl font-bold text-red-600">{{ totalOutstanding() | currency:'INR':'symbol':'1.0-0' }}</p>
+          <p class="text-xl sm:text-2xl font-bold text-red-600">{{ totalOutstanding() | currency:'INR':'symbol':'1.0-0' }}</p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Net Profit</p>
-          <p class="text-2xl font-bold" [ngClass]="netProfit() >= 0 ? 'text-emerald-600' : 'text-red-600'">
+          <p class="text-xl sm:text-2xl font-bold" [ngClass]="netProfit() >= 0 ? 'text-emerald-600' : 'text-red-600'">
             {{ netProfit() | currency:'INR':'symbol':'1.0-0' }}
           </p>
         </div>
@@ -259,13 +259,13 @@ type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div class="bg-green-50 border border-green-200 rounded-xl p-5">
                 <p class="text-sm text-green-700 font-medium mb-1">Total Revenue</p>
-                <p class="text-3xl font-bold text-green-800">
+                <p class="text-2xl sm:text-3xl font-bold text-green-800">
                   {{ filteredSales() | currency:'INR':'symbol':'1.0-0' }}
                 </p>
               </div>
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-5">
                 <p class="text-sm text-orange-700 font-medium mb-1">Total Expenses</p>
-                <p class="text-3xl font-bold text-orange-800">
+                <p class="text-2xl sm:text-3xl font-bold text-orange-800">
                   {{ filteredExpenses() | currency:'INR':'symbol':'1.0-0' }}
                 </p>
               </div>
@@ -275,7 +275,7 @@ type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
                    [ngClass]="netProfit() >= 0 ? 'text-emerald-700' : 'text-red-700'">
                   {{ netProfit() >= 0 ? 'Net Profit' : 'Net Loss' }}
                 </p>
-                <p class="text-3xl font-bold"
+                <p class="text-2xl sm:text-3xl font-bold"
                    [ngClass]="netProfit() >= 0 ? 'text-emerald-800' : 'text-red-800'">
                   {{ netProfit() | currency:'INR':'symbol':'1.0-0' }}
                 </p>
