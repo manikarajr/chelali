@@ -1,109 +1,129 @@
 @if (invoice(); as inv) {
-  <div class="space-y-6" id="invoice-print">
+  <div class="p-1 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
     <!-- Invoice Header -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h3 class="text-xl font-bold text-gray-900">{{ inv.invoiceNumber }}</h3>
-        <p class="text-sm text-gray-500 mt-1">
-          Period: {{ inv.startDate | date:'dd MMM yyyy' }} – {{ inv.endDate | date:'dd MMM yyyy' }}
+    <div class="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-gray-100">
+      <div class="space-y-1">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wider">
+          {{ inv.invoiceNumber }}
+        </span>
+        <h2 class="text-2xl font-bold text-gray-900">Tax Invoice</h2>
+        <p class="text-sm text-gray-500">Generated on {{ inv.generatedDate | date:'fullDate' }}</p>
+      </div>
+
+      <div class="text-left sm:text-right space-y-1">
+        <p class="text-sm font-semibold text-gray-900">Billing Period</p>
+        <p class="text-sm text-gray-600">
+          {{ inv.startDate | date:'dd MMM yyyy' }} – {{ inv.endDate | date:'dd MMM yyyy' }}
         </p>
       </div>
-      <span class="px-3 py-1 rounded-full text-xs font-semibold"
-            [class]="inv.outstandingAmount === 0
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'">
-        {{ inv.outstandingAmount === 0 ? 'Paid' : 'Outstanding' }}
-      </span>
     </div>
 
-    <!-- Company Info -->
-    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-      <p class="font-bold text-blue-900 text-lg">Chelali Ice Plant</p>
-      <p class="text-sm text-blue-700">Ice Manufacturing & Supply</p>
-      <p class="text-sm text-blue-600 mt-1">GSTIN: 29ABCDE1234F1Z5</p>
+    <!-- Info Sections -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 py-2">
+      <!-- To -->
+      <div class="space-y-3 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Billed To</h3>
+        @if (customer(); as cust) {
+          <div class="space-y-1">
+            <p class="text-lg font-bold text-gray-900">{{ cust.name }}</p>
+            <p class="text-sm text-gray-600">{{ cust.address }}</p>
+            <p class="text-sm font-medium text-blue-600 flex items-center gap-1.5 mt-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              {{ cust.phone }}
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Summary Section -->
+      <div class="space-y-3 p-4 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-100">
+        <h3 class="text-xs font-bold text-blue-200 uppercase tracking-widest">Total Balance Due</h3>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-black">{{ inv.totalOutstanding | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+        <p class="text-xs text-blue-100 pt-2 border-t border-blue-500/50">Please pay before the next billing cycle.</p>
+      </div>
     </div>
 
-    <!-- Customer Info -->
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-      <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-2">Bill To</p>
-      @if (customer(); as cust) {
-        <p class="font-semibold text-gray-900">{{ cust.name }}</p>
-        <p class="text-sm text-gray-600">{{ cust.phone }}</p>
-        <p class="text-sm text-gray-600">{{ cust.address }}</p>
-      }
+    <!-- Transactions Table -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-900">Transaction Breakdown</h3>
+        <span class="text-xs font-medium text-gray-500">{{ inv.transactions?.length ?? 0 }} transactions</span>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-gray-50/80 text-gray-500 font-semibold uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3">Description</th>
+              <th class="px-4 py-3 text-right">Qty</th>
+              <th class="px-4 py-3 text-right">Amount</th>
+              <th class="px-4 py-3 text-right">Paid</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50 bg-white">
+            @for (t of inv.transactions; track t.id) {
+              <tr class="hover:bg-blue-50/30 transition-colors">
+                <td class="px-4 py-3.5 whitespace-nowrap text-gray-700 font-medium">{{ t.date | date:'dd MMM' }}</td>
+                <td class="px-4 py-3.5 text-gray-600">Ice Purchase</td>
+                <td class="px-4 py-3.5 text-right font-mono text-gray-700">{{ t.quantity }} kg</td>
+                <td class="px-4 py-3.5 text-right font-semibold text-gray-900">{{ t.totalAmount | currency:'INR':'symbol':'1.0-0' }}</td>
+                <td class="px-4 py-3.5 text-right font-medium text-green-600">{{ t.paidAmount | currency:'INR':'symbol':'1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Amount Summary -->
-    <div class="border border-gray-200 rounded-lg overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
-            <th class="px-4 py-3 text-right font-semibold text-gray-600">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-t border-gray-100">
-            <td class="px-4 py-3 text-gray-700">Ice Supply Charges</td>
-            <td class="px-4 py-3 text-right font-medium text-gray-900">
-              {{ inv.totalAmount | currency:'INR':'symbol':'1.0-0' }}
-            </td>
-          </tr>
-        </tbody>
-        <tfoot class="bg-gray-50 border-t-2 border-gray-200">
-          <tr>
-            <td class="px-4 py-3 font-bold text-gray-900">Total Amount</td>
-            <td class="px-4 py-3 text-right font-bold text-gray-900">
-              {{ inv.totalAmount | currency:'INR':'symbol':'1.0-0' }}
-            </td>
-          </tr>
-          <tr class="border-t border-gray-100">
-            <td class="px-4 py-3 text-gray-600">Outstanding Balance</td>
-            <td class="px-4 py-3 text-right font-bold"
-                [class]="inv.outstandingAmount > 0 ? 'text-red-600' : 'text-green-600'">
-              {{ inv.outstandingAmount | currency:'INR':'symbol':'1.0-0' }}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+    <!-- Final Summary Breakdown -->
+    <div class="flex justify-end pt-4">
+      <div class="w-full sm:w-72 space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Previous Outstanding</span>
+          <span class="font-semibold text-gray-900">{{ inv.previousOutstanding | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Current Purchases (+)</span>
+          <span class="font-semibold text-gray-900">{{ inv.currentPurchases | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Payments Received (−)</span>
+          <span class="font-semibold text-green-600">{{ inv.paymentsReceived | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="pt-3 border-t-2 border-gray-100 flex justify-between items-center bg-gray-50 p-3 rounded-xl">
+          <span class="text-base font-bold text-gray-900 uppercase tracking-wide">Grand Total</span>
+          <span class="text-xl font-black text-blue-600">{{ inv.totalOutstanding | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Actions -->
-    <div class="flex flex-col gap-3">
+    <!-- Footer Action -->
+    <div class="pt-8 flex flex-col sm:flex-row gap-3">
       <button
-        (click)="printInvoice()"
-        class="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm
-               font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white font-bold rounded-xl
+               hover:bg-black transition-all shadow-lg active:scale-[0.98]"
+        (click)="generatePDF()"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-             stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-        </svg>
-        Download / Print Invoice
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Download PDF
       </button>
-
-      @if (customer(); as cust) {
-        <a
-          [href]="whatsappLink(inv, cust)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 text-white text-sm
-                 font-medium rounded-lg hover:bg-green-600 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-               stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-          </svg>
-          Send via WhatsApp
-        </a>
-      }
+      <a
+        [href]="whatsappLink()"
+        target="_blank"
+        class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] text-white font-bold rounded-xl
+               hover:bg-[#128C7E] transition-all shadow-lg active:scale-[0.98]"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.27 9.27 0 01-4.487-1.159l-.322-.19-3.33.873.888-3.243-.209-.333a9.241 9.241 0 01-1.423-4.945c0-5.108 4.158-9.264 9.269-9.264 2.475 0 4.802.964 6.551 2.714 1.75 1.75 2.713 4.076 2.713 6.55 0 5.109-4.16 9.265-9.269 9.265m8.448-18.332A10.155 10.155 0 0012.002 2c-5.61 0-10.17 4.56-10.17 10.172 0 1.794.469 3.545 1.36 5.087L1.998 22l4.888-1.282c1.479.807 3.14 1.233 4.832 1.233h.005c5.611 0 10.17-4.562 10.17-10.173a10.14 10.14 0 00-2.981-7.197"/></svg>
+        Share on WhatsApp
+      </a>
     </div>
-
-    <!-- Footer note -->
-    <p class="text-xs text-gray-400 text-center">
-      Thank you for your business. Please pay within 7 days.
-    </p>
+  </div>
+} @else {
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <svg class="w-16 h-16 opacity-20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1.01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <p class="text-sm">Select an invoice to view details</p>
   </div>
 }

@@ -4,4 +4,5 @@ export interface Customer {
   phone: string;
   address: string;
   status: 'active' | 'inactive';
+  lastInvoiceDate?: string;
 }

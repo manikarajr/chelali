@@ -5,6 +5,7 @@ import { Expense } from '../../core/models/expense.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { ExpenseFormComponent } from './expense-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const CATEGORY_COLORS: Record<string, string> = {
   electricity: 'bg-yellow-100 text-yellow-800',
@@ -16,7 +17,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent, DataTableComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent, DataTableComponent, ConfirmDialogComponent],
   templateUrl: './expense-list.component.html',
 })
 export class ExpenseListComponent {
@@ -25,6 +26,9 @@ export class ExpenseListComponent {
   expenses = this.expenseService.expenses;
   isPanelOpen = signal(false);
   editingExpense = signal<Expense | null>(null);
+  deleteTargetId = signal<number | null>(null);
+  isConfirmSaveOpen = signal(false);
+  pendingSaveData = signal<(Omit<Expense, 'id'> & { id?: number }) | null>(null);
 
   columns: TableColumn[] = [
     { key: 'category', label: 'Category', type: 'status' },
@@ -61,19 +65,42 @@ export class ExpenseListComponent {
     this.editingExpense.set(null);
   }
 
-  onSaved(data: Omit<Expense, 'id'> & { id?: number }): void {
-    if (data.id !== undefined) {
-      this.expenseService.update(data as Expense);
-    } else {
-      const { id: _id, ...rest } = data;
-      this.expenseService.add(rest);
+  onFormSaved(data: Omit<Expense, 'id'> & { id?: number }): void {
+    this.pendingSaveData.set(data);
+    this.isConfirmSaveOpen.set(true);
+  }
+
+  confirmSave(): void {
+    const data = this.pendingSaveData();
+    if (data) {
+      if (data.id !== undefined) {
+        this.expenseService.update(data as Expense);
+      } else {
+        const { id: _id, ...rest } = data;
+        this.expenseService.add(rest);
+      }
     }
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
     this.closePanel();
   }
 
+  cancelSave(): void {
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
+  }
+
   delete(id: number): void {
-    if (confirm('Delete this expense?')) {
-      this.expenseService.delete(id);
-    }
+    this.deleteTargetId.set(id);
+  }
+
+  confirmDelete(): void {
+    const id = this.deleteTargetId();
+    if (id !== null) this.expenseService.delete(id);
+    this.deleteTargetId.set(null);
+  }
+
+  cancelDelete(): void {
+    this.deleteTargetId.set(null);
   }
 }

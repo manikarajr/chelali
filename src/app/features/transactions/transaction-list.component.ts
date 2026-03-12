@@ -7,11 +7,12 @@ import { Transaction, PaymentStatus } from '../../core/models/transaction.model'
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { TransactionFormComponent } from './transaction-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, TitleCasePipe, FormsModule, SlidePanelComponent, TransactionFormComponent, DataTableComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, FormsModule, SlidePanelComponent, TransactionFormComponent, DataTableComponent, ConfirmDialogComponent],
   templateUrl: './transaction-list.component.html',
 })
 export class TransactionListComponent {
@@ -22,6 +23,9 @@ export class TransactionListComponent {
   customers = this.customerService.customers;
   isPanelOpen = signal(false);
   editingTransaction = signal<Transaction | null>(null);
+  deleteTargetId = signal<number | null>(null);
+  isConfirmSaveOpen = signal(false);
+  pendingSaveData = signal<(Omit<Transaction, 'id'> & { id?: number }) | null>(null);
 
   // Filter state
   filterCustomerId = signal<number | null>(null);
@@ -94,19 +98,42 @@ export class TransactionListComponent {
     this.editingTransaction.set(null);
   }
 
-  onSaved(data: Omit<Transaction, 'id'> & { id?: number }): void {
-    if (data.id !== undefined) {
-      this.txService.update(data as Transaction);
-    } else {
-      const { id: _id, ...rest } = data;
-      this.txService.add(rest);
+  onFormSaved(data: Omit<Transaction, 'id'> & { id?: number }): void {
+    this.pendingSaveData.set(data);
+    this.isConfirmSaveOpen.set(true);
+  }
+
+  confirmSave(): void {
+    const data = this.pendingSaveData();
+    if (data) {
+      if (data.id !== undefined) {
+        this.txService.update(data as Transaction);
+      } else {
+        const { id: _id, ...rest } = data;
+        this.txService.add(rest);
+      }
     }
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
     this.closePanel();
   }
 
+  cancelSave(): void {
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
+  }
+
   delete(id: number): void {
-    if (confirm('Delete this transaction?')) {
-      this.txService.delete(id);
-    }
+    this.deleteTargetId.set(id);
+  }
+
+  confirmDelete(): void {
+    const id = this.deleteTargetId();
+    if (id !== null) this.txService.delete(id);
+    this.deleteTargetId.set(null);
+  }
+
+  cancelDelete(): void {
+    this.deleteTargetId.set(null);
   }
 }

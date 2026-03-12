@@ -31,6 +31,15 @@ export class CustomerService {
     this._customers.update(list => list.map(c => c.id === updated.id ? updated : c));
   }
 
+  updateLastInvoiceDate(id: number, date: string): void {
+    this._customers.update(list => list.map(c => {
+      if (c.id === id) {
+        return { ...c, lastInvoiceDate: date };
+      }
+      return c;
+    }));
+  }
+
   delete(id: number): void {
     this._customers.update(list => list.filter(c => c.id !== id));
   }

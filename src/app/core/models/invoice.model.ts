@@ -4,6 +4,10 @@ export interface Invoice {
   customerId: number;
   startDate: string;
   endDate: string;
-  totalAmount: number;
-  outstandingAmount: number;
+  generatedDate: string;
+  previousOutstanding: number;
+  currentPurchases: number;
+  paymentsReceived: number;
+  totalOutstanding: number;
+  transactions?: any[];
 }

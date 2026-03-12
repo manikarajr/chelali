@@ -5,11 +5,12 @@ import { Customer } from '../../core/models/customer.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { CustomerFormComponent } from './customer-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [NgClass, SlidePanelComponent, CustomerFormComponent, DataTableComponent],
+  imports: [NgClass, SlidePanelComponent, CustomerFormComponent, DataTableComponent, ConfirmDialogComponent],
   templateUrl: './customer-list.component.html',
 })
 export class CustomerListComponent {
@@ -18,6 +19,10 @@ export class CustomerListComponent {
   customers = this.customerService.customers;
   isPanelOpen = signal(false);
   editingCustomer = signal<Customer | null>(null);
+  isConfirmOpen = signal(false);
+  pendingDeleteId = signal<number | null>(null);
+  isConfirmSaveOpen = signal(false);
+  pendingSaveData = signal<(Omit<Customer, 'id'> & { id?: number }) | null>(null);
 
   columns: TableColumn[] = [
     { key: 'index', label: '#', type: 'index' },
@@ -43,19 +48,44 @@ export class CustomerListComponent {
     this.editingCustomer.set(null);
   }
 
-  onSaved(data: Omit<Customer, 'id'> & { id?: number }): void {
-    if (data.id !== undefined) {
-      this.customerService.update(data as Customer);
-    } else {
-      const { id: _id, ...rest } = data;
-      this.customerService.add(rest);
+  onFormSaved(data: Omit<Customer, 'id'> & { id?: number }): void {
+    this.pendingSaveData.set(data);
+    this.isConfirmSaveOpen.set(true);
+  }
+
+  confirmSave(): void {
+    const data = this.pendingSaveData();
+    if (data) {
+      if (data.id !== undefined) {
+        this.customerService.update(data as Customer);
+      } else {
+        const { id: _id, ...rest } = data;
+        this.customerService.add(rest);
+      }
     }
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
     this.closePanel();
   }
 
+  cancelSave(): void {
+    this.isConfirmSaveOpen.set(false);
+    this.pendingSaveData.set(null);
+  }
+
   delete(id: number): void {
-    if (confirm('Are you sure you want to delete this customer?')) {
-      this.customerService.delete(id);
-    }
+    this.pendingDeleteId.set(id);
+    this.isConfirmOpen.set(true);
+  }
+
+  confirmDelete(): void {
+    const id = this.pendingDeleteId();
+    if (id !== null) this.customerService.delete(id);
+    this.cancelDelete();
+  }
+
+  cancelDelete(): void {
+    this.isConfirmOpen.set(false);
+    this.pendingDeleteId.set(null);
   }
 }

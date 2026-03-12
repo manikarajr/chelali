@@ -64,6 +64,26 @@
   </app-data-table>
 </div>
 
+<!-- Confirm Save Dialog -->
+<app-confirm-dialog
+  [isOpen]="isConfirmSaveOpen()"
+  [title]="pendingSaveData()?.id !== undefined ? 'Update Customer' : 'Add Customer'"
+  [message]="pendingSaveData()?.id !== undefined ? 'Save changes to this customer?' : 'Add this new customer?'"
+  [confirmLabel]="pendingSaveData()?.id !== undefined ? 'Update' : 'Add'"
+  confirmVariant="primary"
+  (confirmed)="confirmSave()"
+  (cancelled)="cancelSave()"
+/>
+
+<!-- Confirm Delete Dialog -->
+<app-confirm-dialog
+  [isOpen]="isConfirmOpen()"
+  title="Delete Customer"
+  message="Are you sure you want to delete this customer? This action cannot be undone."
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
+
 <!-- Slide Panel -->
 <app-slide-panel
   [isOpen]="isPanelOpen()"
@@ -72,7 +92,7 @@
 >
   <app-customer-form
     [customer]="editingCustomer()"
-    (saved)="onSaved($event)"
+    (saved)="onFormSaved($event)"
     (cancelled)="closePanel()"
   ></app-customer-form>
 </app-slide-panel>

@@ -72,6 +72,26 @@
   </app-data-table>
 </div>
 
+<!-- Confirm Save Dialog -->
+<app-confirm-dialog
+  [isOpen]="isConfirmSaveOpen()"
+  [title]="pendingSaveData()?.id !== undefined ? 'Update Expense' : 'Add Expense'"
+  [message]="pendingSaveData()?.id !== undefined ? 'Save changes to this expense?' : 'Add this new expense?'"
+  [confirmLabel]="pendingSaveData()?.id !== undefined ? 'Update' : 'Add'"
+  confirmVariant="primary"
+  (confirmed)="confirmSave()"
+  (cancelled)="cancelSave()"
+></app-confirm-dialog>
+
+<!-- Confirm Delete Dialog -->
+<app-confirm-dialog
+  [isOpen]="deleteTargetId() !== null"
+  title="Delete Expense"
+  message="Are you sure you want to delete this expense? This action cannot be undone."
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+></app-confirm-dialog>
+
 <!-- Slide Panel -->
 <app-slide-panel
   [isOpen]="isPanelOpen()"
@@ -80,7 +100,7 @@
 >
   <app-expense-form
     [expense]="editingExpense()"
-    (saved)="onSaved($event)"
+    (saved)="onFormSaved($event)"
     (cancelled)="closePanel()"
   ></app-expense-form>
 </app-slide-panel>
