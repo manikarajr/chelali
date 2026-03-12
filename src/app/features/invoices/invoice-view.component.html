@@ -1,5 +1,7 @@
 @if (invoice(); as inv) {
   <div class="p-1 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <!-- Invoice Content (captured for PDF) -->
+    <div class="invoice-content space-y-8">
     <!-- Invoice Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-gray-100">
       <div class="space-y-1">
@@ -46,36 +48,25 @@
     </div>
 
     <!-- Transactions Table -->
-    <div class="space-y-4">
+    <div class="space-y-2">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-900">Transaction Breakdown</h3>
         <span class="text-xs font-medium text-gray-500">{{ inv.transactions?.length ?? 0 }} transactions</span>
       </div>
 
-      <div class="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-gray-50/80 text-gray-500 font-semibold uppercase tracking-wider text-[10px]">
-            <tr>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Description</th>
-              <th class="px-4 py-3 text-right">Qty</th>
-              <th class="px-4 py-3 text-right">Amount</th>
-              <th class="px-4 py-3 text-right">Paid</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-50 bg-white">
-            @for (t of inv.transactions; track t.id) {
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-4 py-3.5 whitespace-nowrap text-gray-700 font-medium">{{ t.date | date:'dd MMM' }}</td>
-                <td class="px-4 py-3.5 text-gray-600">Ice Purchase</td>
-                <td class="px-4 py-3.5 text-right font-mono text-gray-700">{{ t.quantity }} kg</td>
-                <td class="px-4 py-3.5 text-right font-semibold text-gray-900">{{ t.totalAmount | currency:'INR':'symbol':'1.0-0' }}</td>
-                <td class="px-4 py-3.5 text-right font-medium text-green-600">{{ t.paidAmount | currency:'INR':'symbol':'1.0-0' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [data]="transactionTableData()"
+        [columns]="transactionColumns"
+        [pageSize]="50"
+        searchPlaceholder="Search transactions..."
+        noDataMessage="No transactions found."
+      >
+        <ng-template #customCell let-item let-col="column">
+          @if (col.key === 'quantity') {
+            {{ item.quantity }} kg
+          }
+        </ng-template>
+      </app-data-table>
     </div>
 
     <!-- Final Summary Breakdown -->
@@ -99,6 +90,8 @@
         </div>
       </div>
     </div>
+
+    </div><!-- end invoice-content -->
 
     <!-- Footer Action -->
     <div class="pt-8 flex flex-col sm:flex-row gap-3">
