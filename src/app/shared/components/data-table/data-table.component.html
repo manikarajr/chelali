@@ -24,8 +24,87 @@
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="overflow-x-auto">
+  <!-- ===================== MOBILE CARD VIEW (hidden on md+) ===================== -->
+  <div class="md:hidden">
+    @if (paginatedData().length === 0) {
+      <div class="px-4 py-12 text-center text-gray-400">
+        <div class="flex flex-col items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-10 h-10 mb-2 text-gray-300">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25-2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+          </svg>
+          {{ noDataMessage() }}
+        </div>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 gap-3 p-3">
+        @for (item of paginatedData(); track item.id; let i = $index) {
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex flex-col gap-3">
+            <!-- Row index badge -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-400 font-medium">#{{ startIndex() + i }}</span>
+
+              <!-- Actions column (rendered at top-right of card) -->
+              @for (col of columns(); track col.key) {
+                @if (col.type === 'actions') {
+                  <div>
+                    @if (actionTemplate()) {
+                      <ng-container [ngTemplateOutlet]="actionTemplate()!" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Other columns rendered as label / value pairs -->
+            @for (col of columns(); track col.key) {
+              @if (col.type !== 'actions' && col.type !== 'index') {
+                <div class="flex items-start justify-between gap-2 text-sm">
+                  <span class="text-gray-500 font-medium text-xs uppercase tracking-wide shrink-0">{{ col.label }}</span>
+                  <span class="text-gray-800 font-medium text-right">
+                    @switch (col.type) {
+                      @case ('currency') {
+                        {{ item[col.key] | currency:'INR':'symbol':'1.0-0' }}
+                      }
+                      @case ('number') {
+                        {{ item[col.key] | number }}
+                      }
+                      @case ('date') {
+                        {{ item[col.key] | date:'dd MMM yyyy' }}
+                      }
+                      @case ('status') {
+                        @if (statusTemplate()) {
+                          <ng-container [ngTemplateOutlet]="statusTemplate()!" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                        } @else {
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                [ngClass]="item[col.key] === 'active' || item[col.key] === 'paid'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-gray-100 text-gray-600'">
+                            {{ item[col.key] | titlecase }}
+                          </span>
+                        }
+                      }
+                      @default {
+                        @if (customCellTemplate()) {
+                          <ng-container [ngTemplateOutlet]="customCellTemplate()!" [ngTemplateOutletContext]="{ $implicit: item, column: col }"></ng-container>
+                        } @else {
+                          {{ item[col.key] }}
+                        }
+                      }
+                    }
+                  </span>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ===================== DESKTOP TABLE VIEW (hidden below md) ===================== -->
+  <div class="hidden md:block overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wide">
         <tr>
@@ -34,8 +113,6 @@
               [class]="col.headerClassName || ''"
               [ngClass]="{
                 'px-4 py-3 font-semibold': true,
-                'hidden md:table-cell': col.hiddenMd,
-                'hidden sm:table-cell': col.hiddenSm,
                 'text-left': !col.className?.includes('text-right') && !col.className?.includes('text-center'),
                 'text-right': col.className?.includes('text-right'),
                 'text-center': col.className?.includes('text-center')
@@ -52,11 +129,7 @@
             @for (col of columns(); track col.key) {
               <td 
                 [class]="col.className || ''"
-                [ngClass]="{
-                  'px-4 py-3': true,
-                  'hidden md:table-cell': col.hiddenMd,
-                  'hidden sm:table-cell': col.hiddenSm
-                }"
+                [ngClass]="{ 'px-4 py-3': true }"
               >
                 @switch (col.type) {
                   @case ('index') {
