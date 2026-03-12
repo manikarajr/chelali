@@ -6,40 +6,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   selector: 'app-main-layout',
   standalone: true,
   imports: [RouterOutlet, SidebarComponent],
-  template: `
-    <div class="flex h-screen bg-gray-50">
-      <app-sidebar [isOpen]="sidebarOpen()" (closed)="sidebarOpen.set(false)"></app-sidebar>
-      <div class="flex flex-col flex-1 min-h-screen lg:ml-64">
-        <!-- Mobile top bar -->
-        <div class="lg:hidden flex items-center justify-between h-14 px-4 bg-white border-b border-gray-200 shrink-0">
-          <button
-            class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            (click)="toggleSidebar()"
-            aria-label="Toggle sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 bg-blue-500 rounded-md flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                   stroke="currentColor" class="w-4 h-4 text-white">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-              </svg>
-            </div>
-            <span class="text-sm font-bold text-gray-900">Chelali Ice Plant</span>
-          </div>
-          <div class="w-9"></div>
-        </div>
-        <main class="flex-1 overflow-y-auto p-4 lg:p-6">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-    </div>
-  `,
+  templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent {
   sidebarOpen = signal(false);
