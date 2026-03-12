@@ -4,7 +4,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 import { NAV_ITEMS } from '../sidebar/sidebar.config';
 import { AuthService } from '../../core/services/auth.service';
 
-const BOTTOM_ROUTES = ['/customers', '/transactions', '/invoices'];
+const BOTTOM_ROUTES = ['/dashboard', '/customers', '/transactions', '/invoices'];
 
 @Component({
   selector: 'app-main-layout',
