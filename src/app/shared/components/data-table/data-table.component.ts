@@ -21,10 +21,10 @@ export interface TableColumn {
 export class DataTableComponent {
   data = input<any[]>([]);
   columns = input<TableColumn[]>([]);
-  pageSize = input<number>(10);
+  pageSize = input<number>(5);
   searchPlaceholder = input<string>('Search...');
   noDataMessage = input<string>('No data found.');
-  
+
   actionTemplate = contentChild<TemplateRef<any>>('actions');
   statusTemplate = contentChild<TemplateRef<any>>('status');
   customCellTemplate = contentChild<TemplateRef<any>>('customCell');
@@ -38,7 +38,7 @@ export class DataTableComponent {
     if (!q) return allData;
 
     return allData.filter(item => {
-      return Object.values(item).some(val => 
+      return Object.values(item).some(val =>
         String(val).toLowerCase().includes(q)
       );
     });

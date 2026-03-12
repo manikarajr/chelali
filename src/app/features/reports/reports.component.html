@@ -119,124 +119,53 @@
 
     <!-- Sales Summary Tab -->
     @if (activeTab() === 'sales') {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wide">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold">Date</th>
-              <th class="px-4 py-3 text-left font-semibold">Customer</th>
-              <th class="px-4 py-3 text-right font-semibold">Qty (kg)</th>
-              <th class="px-4 py-3 text-right font-semibold">Total</th>
-              <th class="px-4 py-3 text-right font-semibold">Collected</th>
-              <th class="px-4 py-3 text-center font-semibold">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (t of filteredTransactions(); track t.id) {
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-gray-500">{{ t.date | date:'dd MMM yyyy' }}</td>
-                <td class="px-4 py-3 font-medium text-gray-900">{{ customerName(t.customerId) }}</td>
-                <td class="px-4 py-3 text-right text-gray-700">{{ t.quantity }}</td>
-                <td class="px-4 py-3 text-right font-medium text-gray-900">
-                  {{ t.totalAmount | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-                <td class="px-4 py-3 text-right text-green-600">
-                  {{ t.paidAmount | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
-                        [ngClass]="{
-                          'bg-green-100 text-green-800': t.paymentStatus === 'paid',
-                          'bg-yellow-100 text-yellow-800': t.paymentStatus === 'partial',
-                          'bg-red-100 text-red-800': t.paymentStatus === 'unpaid'
-                        }">
-                    {{ t.paymentStatus | titlecase }}
-                  </span>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="px-4 py-10 text-center text-gray-400">No sales data for selected period.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [data]="mappedSales()"
+        [columns]="salesColumns"
+        searchPlaceholder="Search sales..."
+        noDataMessage="No sales data for selected period."
+      >
+        <ng-template #status let-t>
+          <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': t.paymentStatus === 'paid',
+                  'bg-yellow-100 text-yellow-800': t.paymentStatus === 'partial',
+                  'bg-red-100 text-red-800': t.paymentStatus === 'unpaid'
+                }">
+            {{ t.paymentStatus | titlecase }}
+          </span>
+        </ng-template>
+      </app-data-table>
     }
 
     <!-- Expense Summary Tab -->
     @if (activeTab() === 'expenses') {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wide">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold">Date</th>
-              <th class="px-4 py-3 text-left font-semibold">Category</th>
-              <th class="px-4 py-3 text-right font-semibold">Amount</th>
-              <th class="px-4 py-3 text-left font-semibold">Notes</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (e of filteredExpenseItems(); track e.id) {
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-gray-500">{{ e.date | date:'dd MMM yyyy' }}</td>
-                <td class="px-4 py-3">
-                  <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                    {{ e.category | titlecase }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-right font-semibold text-gray-900">
-                  {{ e.amount | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-                <td class="px-4 py-3 text-gray-500 max-w-xs truncate">{{ e.notes || '—' }}</td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="4" class="px-4 py-10 text-center text-gray-400">No expense data for selected period.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [data]="filteredExpenseItems()"
+        [columns]="expenseColumns"
+        searchPlaceholder="Search expenses..."
+        noDataMessage="No expense data for selected period."
+      />
     }
 
     <!-- Outstanding Tab -->
     @if (activeTab() === 'outstanding') {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wide">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold">Customer</th>
-              <th class="px-4 py-3 text-left font-semibold">Phone</th>
-              <th class="px-4 py-3 text-right font-semibold">Total Billed</th>
-              <th class="px-4 py-3 text-right font-semibold">Paid</th>
-              <th class="px-4 py-3 text-right font-semibold">Outstanding</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (row of customerOutstanding(); track row.id) {
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium text-gray-900">{{ row.name }}</td>
-                <td class="px-4 py-3 text-gray-500">{{ row.phone }}</td>
-                <td class="px-4 py-3 text-right text-gray-700">
-                  {{ row.totalBilled | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-                <td class="px-4 py-3 text-right text-green-600">
-                  {{ row.paid | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-                <td class="px-4 py-3 text-right font-bold"
-                    [ngClass]="row.outstanding > 0 ? 'text-red-600' : 'text-gray-400'">
-                  {{ row.outstanding | currency:'INR':'symbol':'1.0-0' }}
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="px-4 py-10 text-center text-gray-400">No outstanding amounts.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [data]="customerOutstanding()"
+        [columns]="outstandingColumns"
+        searchPlaceholder="Search customers..."
+        noDataMessage="No outstanding amounts."
+      >
+        <ng-template #customCell let-row let-column="column">
+          @if (column.key === 'outstanding') {
+            <span [ngClass]="row.outstanding > 0 ? 'text-red-600' : 'text-gray-400'">
+              {{ row.outstanding | currency:'INR':'symbol':'1.0-0' }}
+            </span>
+          } @else {
+            {{ row[column.key] }}
+          }
+        </ng-template>
+      </app-data-table>
     }
 
     <!-- Profit/Loss Tab -->

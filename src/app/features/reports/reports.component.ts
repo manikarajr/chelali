@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { NgClass, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { ExpenseService } from '../../core/services/expense.service';
 import { CustomerService } from '../../core/services/customer.service';
@@ -10,7 +11,7 @@ type ReportTab = 'sales' | 'expenses' | 'outstanding' | 'profit';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, DatePipe, TitleCasePipe, FormsModule],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, FormsModule, DataTableComponent],
   templateUrl: './reports.component.html',
 })
 export class ReportsComponent {
@@ -31,6 +32,30 @@ export class ReportsComponent {
     { value: 'profit' as ReportTab, label: 'Profit / Loss' },
   ];
 
+  salesColumns: TableColumn[] = [
+    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'customerName', label: 'Customer', type: 'text' },
+    { key: 'quantity', label: 'Qty (kg)', type: 'number', className: 'text-right' },
+    { key: 'totalAmount', label: 'Total', type: 'currency', className: 'text-right' },
+    { key: 'paidAmount', label: 'Collected', type: 'currency', className: 'text-right text-green-600' },
+    { key: 'paymentStatus', label: 'Status', type: 'status', className: 'text-center' },
+  ];
+
+  expenseColumns: TableColumn[] = [
+    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'category', label: 'Category', type: 'status' },
+    { key: 'amount', label: 'Amount', type: 'currency', className: 'text-right font-semibold' },
+    { key: 'notes', label: 'Notes', type: 'text', className: 'max-w-xs truncate text-gray-500' },
+  ];
+
+  outstandingColumns: TableColumn[] = [
+    { key: 'name', label: 'Customer', type: 'text' },
+    { key: 'phone', label: 'Phone', type: 'text', className: 'text-gray-500' },
+    { key: 'totalBilled', label: 'Total Billed', type: 'currency', className: 'text-right text-gray-700' },
+    { key: 'paid', label: 'Paid', type: 'currency', className: 'text-right text-green-600' },
+    { key: 'outstanding', label: 'Outstanding', type: 'currency', className: 'text-right font-bold' },
+  ];
+
   private inRange(dateStr: string): boolean {
     const d = new Date(dateStr);
     if (this.filterType === 'monthly') {
@@ -46,6 +71,13 @@ export class ReportsComponent {
 
   filteredTransactions = computed(() =>
     this.txService.transactions().filter(t => this.inRange(t.date))
+  );
+
+  mappedSales = computed(() =>
+    this.filteredTransactions().map(t => ({
+      ...t,
+      customerName: this.customerName(t.customerId)
+    }))
   );
 
   filteredExpenseItems = computed(() =>
