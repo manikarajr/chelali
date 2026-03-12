@@ -11,7 +11,7 @@ export class ConfirmDialogComponent {
   message = input<string>('Are you sure?');
   confirmLabel = input<string>('Delete');
   cancelLabel = input<string>('Cancel');
-  confirmVariant = input<'danger' | 'primary'>('danger');
+  confirmVariant = input<'danger' | 'primary' | 'success'>('danger');
 
   confirmed = output<void>();
   cancelled = output<void>();

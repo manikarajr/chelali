@@ -101,23 +101,37 @@
       <!-- Date From -->
       <div class="flex flex-col gap-1">
         <label class="text-xs font-medium text-gray-500 px-0.5">From</label>
-        <input
-          type="date"
-          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          [ngModel]="filterDateFrom()"
-          (ngModelChange)="filterDateFrom.set($event)"
-        />
+        <div class="relative">
+          <input
+            type="date"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngModel]="filterDateFrom()"
+            (ngModelChange)="filterDateFrom.set($event)"
+          />
+          @if (!filterDateFrom()) {
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              dd/mm/yyyy
+            </span>
+          }
+        </div>
       </div>
 
       <!-- Date To -->
       <div class="flex flex-col gap-1">
         <label class="text-xs font-medium text-gray-500 px-0.5">To</label>
-        <input
-          type="date"
-          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          [ngModel]="filterDateTo()"
-          (ngModelChange)="filterDateTo.set($event)"
-        />
+        <div class="relative">
+          <input
+            type="date"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngModel]="filterDateTo()"
+            (ngModelChange)="filterDateTo.set($event)"
+          />
+          @if (!filterDateTo()) {
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              dd/mm/yyyy
+            </span>
+          }
+        </div>
       </div>
 
     </div>
@@ -203,7 +217,7 @@
   [title]="pendingSaveData()?.id !== undefined ? 'Update Transaction' : 'New Transaction'"
   [message]="pendingSaveData()?.id !== undefined ? 'Save changes to this transaction?' : 'Add this new transaction?'"
   [confirmLabel]="pendingSaveData()?.id !== undefined ? 'Update' : 'Add'"
-  confirmVariant="primary"
+  [confirmVariant]="pendingSaveData()?.id !== undefined ? 'primary' : 'success'"
   (confirmed)="confirmSave()"
   (cancelled)="cancelSave()"
 ></app-confirm-dialog>

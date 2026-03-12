@@ -78,7 +78,7 @@
   [title]="pendingSaveData()?.id !== undefined ? 'Update Expense' : 'Add Expense'"
   [message]="pendingSaveData()?.id !== undefined ? 'Save changes to this expense?' : 'Add this new expense?'"
   [confirmLabel]="pendingSaveData()?.id !== undefined ? 'Update' : 'Add'"
-  confirmVariant="primary"
+  [confirmVariant]="pendingSaveData()?.id !== undefined ? 'primary' : 'success'"
   (confirmed)="confirmSave()"
   (cancelled)="cancelSave()"
 ></app-confirm-dialog>
