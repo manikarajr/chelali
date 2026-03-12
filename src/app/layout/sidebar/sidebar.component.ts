@@ -15,8 +15,7 @@ export class SidebarComponent {
   closed = output<void>();
 
   sidebarClasses = computed(() =>
-    'fixed bg-gray-900 text-white flex flex-col z-50 ' +
-    'transition-all duration-300 ease-in-out ' +
+    'fixed bg-gray-900 text-white flex flex-col z-50 will-change-transform ' +
     // Mobile: bottom bar
     'bottom-0 left-0 right-0 h-16 border-t border-gray-800 ' +
     // Desktop: left sidebar
