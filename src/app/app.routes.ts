@@ -23,11 +23,6 @@ export const routes: Routes = [
           import('./features/transactions/transaction-list.component').then(m => m.TransactionListComponent),
       },
       {
-        path: 'payments',
-        loadComponent: () =>
-          import('./features/payments/payment-list.component').then(m => m.PaymentListComponent),
-      },
-      {
         path: 'invoices',
         loadComponent: () =>
           import('./features/invoices/invoice-list.component').then(m => m.InvoiceListComponent),

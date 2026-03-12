@@ -1,13 +1,25 @@
-import { Component, inject, input, output, OnChanges } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { NgFor } from '@angular/common';
-import { Transaction } from '../../core/models/transaction.model';
+import { Component, DestroyRef, inject, input, OnChanges, output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { merge } from 'rxjs';
 import { Customer } from '../../core/models/customer.model';
+import { PaymentMethod, PaymentStatus, Transaction } from '../../core/models/transaction.model';
+
+const FORM_DEFAULTS = {
+  customerId: '' as string | number,
+  date: new Date().toISOString().split('T')[0],
+  quantity: 0,
+  unitPrice: 20,
+  totalAmount: 0,
+  paidAmount: 0,
+  outstandingAmount: 0,
+  paymentMethod: 'cash' as PaymentMethod,
+};
 
 @Component({
   selector: 'app-transaction-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgFor],
+  imports: [ReactiveFormsModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
       <!-- Customer -->
@@ -19,7 +31,9 @@ import { Customer } from '../../core/models/customer.model';
                  focus:ring-2 focus:ring-blue-500 bg-white"
         >
           <option value="">Select customer</option>
-          <option *ngFor="let c of customers()" [value]="c.id">{{ c.name }}</option>
+          @for (c of customers(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
         </select>
         @if (form.get('customerId')?.invalid && form.get('customerId')?.touched) {
           <p class="text-xs text-red-500 mt-1">Customer is required.</p>
@@ -46,7 +60,6 @@ import { Customer } from '../../core/models/customer.model';
             formControlName="quantity"
             placeholder="0"
             min="1"
-            (input)="recalculate()"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none
                    focus:ring-2 focus:ring-blue-500"
           />
@@ -58,7 +71,6 @@ import { Customer } from '../../core/models/customer.model';
             formControlName="unitPrice"
             placeholder="0"
             min="0"
-            (input)="recalculate()"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none
                    focus:ring-2 focus:ring-blue-500"
           />
@@ -84,10 +96,27 @@ import { Customer } from '../../core/models/customer.model';
           formControlName="paidAmount"
           placeholder="0"
           min="0"
-          (input)="recalculate()"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none
                  focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+
+      <!-- Payment Method -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
+        <div class="flex gap-3">
+          @for (m of methods; track m.value) {
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                formControlName="paymentMethod"
+                [value]="m.value"
+                class="text-blue-600"
+              />
+              <span class="text-sm text-gray-700">{{ m.label }}</span>
+            </label>
+          }
+        </div>
       </div>
 
       <!-- Outstanding Amount (readonly) -->
@@ -129,53 +158,67 @@ import { Customer } from '../../core/models/customer.model';
 })
 export class TransactionFormComponent implements OnChanges {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
 
   transaction = input<Transaction | null>(null);
   customers = input<Customer[]>([]);
   saved = output<Omit<Transaction, 'id'> & { id?: number }>();
   cancelled = output<void>();
 
+  readonly methods: { value: PaymentMethod; label: string }[] = [
+    { value: 'cash', label: 'Cash' },
+    { value: 'bank', label: 'Bank' },
+    { value: 'online', label: 'Online' },
+  ];
+
   form = this.fb.group({
-    customerId: ['', Validators.required],
-    date: [new Date().toISOString().split('T')[0], Validators.required],
-    quantity: [0, [Validators.required, Validators.min(1)]],
-    unitPrice: [20, [Validators.required, Validators.min(0)]],
-    totalAmount: [{ value: 0, disabled: true }],
-    paidAmount: [0, [Validators.min(0)]],
-    outstandingAmount: [{ value: 0, disabled: true }],
+    customerId: [FORM_DEFAULTS.customerId, Validators.required],
+    date: [FORM_DEFAULTS.date, Validators.required],
+    quantity: [FORM_DEFAULTS.quantity, [Validators.required, Validators.min(1)]],
+    unitPrice: [FORM_DEFAULTS.unitPrice, [Validators.required, Validators.min(0)]],
+    totalAmount: [{ value: FORM_DEFAULTS.totalAmount, disabled: true }],
+    paidAmount: [FORM_DEFAULTS.paidAmount, Validators.min(0)],
+    outstandingAmount: [{ value: FORM_DEFAULTS.outstandingAmount, disabled: true }],
+    paymentMethod: [FORM_DEFAULTS.paymentMethod, Validators.required],
   });
+
+  constructor() {
+    merge(
+      this.form.get('quantity')!.valueChanges,
+      this.form.get('unitPrice')!.valueChanges,
+      this.form.get('paidAmount')!.valueChanges,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.recalculate());
+  }
 
   ngOnChanges(): void {
     const t = this.transaction();
     if (t) {
       this.form.patchValue({
-        customerId: String(t.customerId),
+        customerId: t.customerId,
         date: t.date,
         quantity: t.quantity,
         unitPrice: t.unitPrice,
         totalAmount: t.totalAmount,
         paidAmount: t.paidAmount,
         outstandingAmount: t.outstandingAmount,
+        paymentMethod: t.paymentMethod,
       });
     } else {
-      this.form.reset({
-        date: new Date().toISOString().split('T')[0],
-        quantity: 0,
-        unitPrice: 20,
-        totalAmount: 0,
-        paidAmount: 0,
-        outstandingAmount: 0,
-      });
+      this.form.reset(FORM_DEFAULTS);
     }
   }
 
-  recalculate(): void {
+  private recalculate(): void {
     const qty = this.form.get('quantity')?.value ?? 0;
     const price = this.form.get('unitPrice')?.value ?? 0;
     const paid = this.form.get('paidAmount')?.value ?? 0;
     const total = qty * price;
-    const outstanding = Math.max(0, total - paid);
-    this.form.patchValue({ totalAmount: total, outstandingAmount: outstanding }, { emitEvent: false });
+    this.form.patchValue(
+      { totalAmount: total, outstandingAmount: Math.max(0, total - paid) },
+      { emitEvent: false },
+    );
   }
 
   submit(): void {
@@ -184,9 +227,10 @@ export class TransactionFormComponent implements OnChanges {
     const total = (val.quantity ?? 0) * (val.unitPrice ?? 0);
     const paid = val.paidAmount ?? 0;
     const outstanding = Math.max(0, total - paid);
-    let status: 'paid' | 'partial' | 'unpaid' = 'unpaid';
-    if (outstanding === 0) status = 'paid';
-    else if (paid > 0) status = 'partial';
+
+    let paymentStatus: PaymentStatus = 'unpaid';
+    if (outstanding === 0) paymentStatus = 'paid';
+    else if (paid > 0) paymentStatus = 'partial';
 
     const t = this.transaction();
     this.saved.emit({
@@ -198,15 +242,9 @@ export class TransactionFormComponent implements OnChanges {
       totalAmount: total,
       paidAmount: paid,
       outstandingAmount: outstanding,
-      paymentStatus: status,
+      paymentStatus,
+      paymentMethod: val.paymentMethod ?? 'cash',
     });
-    this.form.reset({
-      date: new Date().toISOString().split('T')[0],
-      quantity: 0,
-      unitPrice: 20,
-      totalAmount: 0,
-      paidAmount: 0,
-      outstandingAmount: 0,
-    });
+    this.form.reset(FORM_DEFAULTS);
   }
 }

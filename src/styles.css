@@ -33,7 +33,6 @@
 /* Print styles for invoices */
 @media print {
   app-sidebar,
-  app-header,
   button,
   a {
     display: none !important;

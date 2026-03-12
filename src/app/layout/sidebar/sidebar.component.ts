@@ -56,14 +56,24 @@ interface NavItem {
         }
       </nav>
 
-      <!-- Footer -->
-      <div class="px-6 py-4 border-t border-gray-700">
-        <p class="text-xs text-gray-500">v1.0.0 &copy; 2024</p>
+      <!-- User Profile -->
+      <div class="px-4 py-4 border-t border-gray-700">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+            A
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-white truncate">Admin</p>
+            <p class="text-xs text-gray-400 truncate">Administrator</p>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3">v1.0.0 &copy; {{ currentYear }}</p>
       </div>
     </aside>
   `,
 })
 export class SidebarComponent {
+  readonly currentYear = new Date().getFullYear();
   isOpen = input(false);
   closed = output<void>();
 
@@ -88,11 +98,6 @@ export class SidebarComponent {
       label: 'Transactions',
       route: '/transactions',
       icon: 'M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.932-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z',
-    },
-    {
-      label: 'Payments',
-      route: '/payments',
-      icon: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
     },
     {
       label: 'Invoices',

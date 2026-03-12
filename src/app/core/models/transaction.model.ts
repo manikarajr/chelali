@@ -1,3 +1,6 @@
+export type PaymentStatus = 'paid' | 'partial' | 'unpaid';
+export type PaymentMethod = 'cash' | 'bank' | 'online';
+
 export interface Transaction {
   id: number;
   customerId: number;
@@ -7,5 +10,6 @@ export interface Transaction {
   totalAmount: number;
   paidAmount: number;
   outstandingAmount: number;
-  paymentStatus: 'paid' | 'partial' | 'unpaid';
+  paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
 }
