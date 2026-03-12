@@ -143,7 +143,7 @@
           >
             <option value="">Select a customer</option>
             @for (c of customers(); track c.id) {
-              <option [value]="c.id">{{ c.name }}</option>
+              <option [value]="c.id">{{ c.name }} ({{ c.phone }})</option>
             }
           </select>
         </div>
