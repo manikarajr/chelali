@@ -19,7 +19,6 @@ export class CustomerFormComponent implements OnChanges {
     name: ['', [Validators.required, Validators.minLength(2)]],
     phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
     address: [''],
-    openingBalance: [0, [Validators.min(0)]],
     status: ['active' as 'active' | 'inactive'],
   });
 
@@ -30,11 +29,10 @@ export class CustomerFormComponent implements OnChanges {
         name: c.name,
         phone: c.phone,
         address: c.address,
-        openingBalance: c.openingBalance,
         status: c.status,
       });
     } else {
-      this.form.reset({ status: 'active', openingBalance: 0 });
+      this.form.reset({ status: 'active' });
     }
   }
 
@@ -47,9 +45,8 @@ export class CustomerFormComponent implements OnChanges {
       name: val.name ?? '',
       phone: val.phone ?? '',
       address: val.address ?? '',
-      openingBalance: val.openingBalance ?? 0,
       status: (val.status as 'active' | 'inactive') ?? 'active',
     });
-    this.form.reset({ status: 'active', openingBalance: 0 });
+    this.form.reset({ status: 'active' });
   }
 }

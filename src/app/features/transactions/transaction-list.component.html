@@ -18,9 +18,98 @@
     </button>
   </div>
 
+  <!-- Filters -->
+  <div class="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+
+      <!-- Customer -->
+      <div class="flex flex-col gap-1 col-span-2 sm:col-span-1">
+        <label class="text-xs font-medium text-gray-500 px-0.5">Customer</label>
+        <select
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [ngModel]="filterCustomerId() ?? ''"
+          (ngModelChange)="filterCustomerId.set($event === '' ? null : +$event)"
+        >
+          <option value="">All Customers</option>
+          @for (c of customers(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Status -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500 px-0.5">Status</label>
+        <select
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [ngModel]="filterStatus() ?? ''"
+          (ngModelChange)="filterStatus.set($event || null)"
+        >
+          <option value="">All Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="partial">Partial</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+      </div>
+
+      <!-- Outstanding -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500 px-0.5">Outstanding</label>
+        <select
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [ngModel]="filterOutstanding() ?? ''"
+          (ngModelChange)="filterOutstanding.set($event || null)"
+        >
+          <option value="">Any</option>
+          <option value="has">Has Outstanding</option>
+          <option value="none">Cleared</option>
+        </select>
+      </div>
+
+      <!-- Date From -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500 px-0.5">From</label>
+        <input
+          type="date"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [ngModel]="filterDateFrom()"
+          (ngModelChange)="filterDateFrom.set($event)"
+        />
+      </div>
+
+      <!-- Date To -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500 px-0.5">To</label>
+        <input
+          type="date"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [ngModel]="filterDateTo()"
+          (ngModelChange)="filterDateTo.set($event)"
+        />
+      </div>
+
+    </div>
+
+    @if (hasActiveFilters()) {
+      <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+        <span class="text-xs text-gray-500">{{ filteredTransactions().length }} result(s)</span>
+        <button
+          (click)="clearFilters()"
+          class="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-medium"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-3.5 h-3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+          Clear filters
+        </button>
+      </div>
+    }
+  </div>
+
   <!-- Table Card -->
   <app-data-table
-    [data]="transactions()"
+    [data]="filteredTransactions()"
     [columns]="columns"
     searchPlaceholder="Search transactions..."
     noDataMessage="No transactions found."

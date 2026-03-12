@@ -1,8 +1,9 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { NgClass, CurrencyPipe, TitleCasePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TransactionService } from '../../core/services/transaction.service';
 import { CustomerService } from '../../core/services/customer.service';
-import { Transaction } from '../../core/models/transaction.model';
+import { Transaction, PaymentStatus } from '../../core/models/transaction.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { TransactionFormComponent } from './transaction-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
@@ -10,7 +11,7 @@ import { DataTableComponent, TableColumn } from '../../shared/components/data-ta
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, TransactionFormComponent, DataTableComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, FormsModule, SlidePanelComponent, TransactionFormComponent, DataTableComponent],
   templateUrl: './transaction-list.component.html',
 })
 export class TransactionListComponent {
@@ -21,6 +22,46 @@ export class TransactionListComponent {
   customers = this.customerService.customers;
   isPanelOpen = signal(false);
   editingTransaction = signal<Transaction | null>(null);
+
+  // Filter state
+  filterCustomerId = signal<number | null>(null);
+  filterStatus = signal<PaymentStatus | null>(null);
+  filterOutstanding = signal<'has' | 'none' | null>(null);
+  filterDateFrom = signal<string>('');
+  filterDateTo = signal<string>('');
+
+  filteredTransactions = computed(() => {
+    let data = this.transactions();
+    const cId = this.filterCustomerId();
+    const status = this.filterStatus();
+    const outstanding = this.filterOutstanding();
+    const from = this.filterDateFrom();
+    const to = this.filterDateTo();
+
+    if (cId !== null) data = data.filter(t => t.customerId === cId);
+    if (status) data = data.filter(t => t.paymentStatus === status);
+    if (outstanding === 'has') data = data.filter(t => t.outstandingAmount > 0);
+    if (outstanding === 'none') data = data.filter(t => t.outstandingAmount === 0);
+    if (from) data = data.filter(t => t.date >= from);
+    if (to) data = data.filter(t => t.date <= to);
+    return data;
+  });
+
+  hasActiveFilters = computed(() =>
+    this.filterCustomerId() !== null ||
+    this.filterStatus() !== null ||
+    this.filterOutstanding() !== null ||
+    !!this.filterDateFrom() ||
+    !!this.filterDateTo()
+  );
+
+  clearFilters(): void {
+    this.filterCustomerId.set(null);
+    this.filterStatus.set(null);
+    this.filterOutstanding.set(null);
+    this.filterDateFrom.set('');
+    this.filterDateTo.set('');
+  }
 
   columns: TableColumn[] = [
     { key: 'customerId', label: 'Customer', className: 'font-medium text-gray-900' },

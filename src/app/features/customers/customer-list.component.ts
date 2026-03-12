@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed } from '@angular/core';
-import { NgClass, DecimalPipe } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { CustomerService } from '../../core/services/customer.service';
 import { Customer } from '../../core/models/customer.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
@@ -24,7 +24,6 @@ export class CustomerListComponent {
     { key: 'name', label: 'Name', className: 'font-medium text-gray-900' },
     { key: 'phone', label: 'Phone', className: 'text-gray-600' },
     { key: 'address', label: 'Address', className: 'text-gray-500 max-w-xs truncate', hiddenMd: true },
-    { key: 'openingBalance', label: 'Opening Balance', type: 'currency', className: 'text-right text-gray-700', hiddenSm: true },
     { key: 'status', label: 'Status', type: 'status', className: 'text-center' },
     { key: 'actions', label: 'Actions', type: 'actions', className: 'text-center' }
   ];

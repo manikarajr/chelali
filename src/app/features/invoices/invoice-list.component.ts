@@ -66,7 +66,7 @@ export class InvoiceListComponent {
     // compute total from transactions for this customer in the date range
     const cId = Number(this.newInvCustomerId);
     const cust = this.customerService.getById(cId);
-    const total = cust?.openingBalance ?? 0; // simplified — use opening balance
+    const total = 0;
     this.invoiceService.add({
       customerId: cId,
       startDate: this.newInvStart,

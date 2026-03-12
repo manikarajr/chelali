@@ -4,11 +4,11 @@ import { Customer } from '../models/customer.model';
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private _customers = signal<Customer[]>([
-    { id: 1, name: 'Ravi Kumar', phone: '9876543210', address: '12 MG Road, Bangalore', openingBalance: 5000, status: 'active' },
-    { id: 2, name: 'Suresh Patel', phone: '9812345678', address: '45 Park Street, Mumbai', openingBalance: 2000, status: 'active' },
-    { id: 3, name: 'Priya Singh', phone: '9898765432', address: '78 Lake View, Pune', openingBalance: 0, status: 'inactive' },
-    { id: 4, name: 'Ahmed Khan', phone: '9765432109', address: '23 Civil Lines, Delhi', openingBalance: 3500, status: 'active' },
-    { id: 5, name: 'Meera Nair', phone: '9654321098', address: '56 Beach Road, Chennai', openingBalance: 1000, status: 'active' },
+    { id: 1, name: 'Ravi Kumar', phone: '9876543210', address: '12 MG Road, Bangalore', status: 'active' },
+    { id: 2, name: 'Suresh Patel', phone: '9812345678', address: '45 Park Street, Mumbai', status: 'active' },
+    { id: 3, name: 'Priya Singh', phone: '9898765432', address: '78 Lake View, Pune', status: 'inactive' },
+    { id: 4, name: 'Ahmed Khan', phone: '9765432109', address: '23 Civil Lines, Delhi', status: 'active' },
+    { id: 5, name: 'Meera Nair', phone: '9654321098', address: '56 Beach Road, Chennai', status: 'active' },
   ]);
 
   private nextId = 6;

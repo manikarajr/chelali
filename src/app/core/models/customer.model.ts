@@ -3,6 +3,5 @@ export interface Customer {
   name: string;
   phone: string;
   address: string;
-  openingBalance: number;
   status: 'active' | 'inactive';
 }
