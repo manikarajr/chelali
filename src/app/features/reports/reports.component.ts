@@ -26,10 +26,10 @@ export class ReportsComponent {
   dateTo = '';
 
   tabs = [
-    { value: 'sales' as ReportTab, label: 'Sales Summary' },
-    { value: 'expenses' as ReportTab, label: 'Expense Summary' },
-    { value: 'outstanding' as ReportTab, label: 'Outstanding' },
-    { value: 'profit' as ReportTab, label: 'Profit / Loss' },
+    { value: 'sales' as ReportTab, label: 'Sales Summary', shortLabel: 'Sales' },
+    { value: 'expenses' as ReportTab, label: 'Expense Summary', shortLabel: 'Expenses' },
+    { value: 'outstanding' as ReportTab, label: 'Outstanding', shortLabel: 'Due' },
+    { value: 'profit' as ReportTab, label: 'Profit / Loss', shortLabel: 'P&L' },
   ];
 
   salesColumns: TableColumn[] = [
