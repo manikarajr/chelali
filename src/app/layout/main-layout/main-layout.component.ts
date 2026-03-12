@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { NAV_ITEMS } from '../sidebar/sidebar.config';
+import { AuthService } from '../../core/services/auth.service';
 
 const BOTTOM_ROUTES = ['/customers', '/transactions', '/invoices'];
 
@@ -12,6 +13,9 @@ const BOTTOM_ROUTES = ['/customers', '/transactions', '/invoices'];
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent {
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   sidebarOpen = signal(false);
   hamburgerOpen = signal(false);
   toggleSidebar() { this.sidebarOpen.update(v => !v); }
@@ -20,4 +24,9 @@ export class MainLayoutComponent {
 
   bottomNavItems = NAV_ITEMS.filter(i => BOTTOM_ROUTES.includes(i.route));
   hamburgerNavItems = NAV_ITEMS.filter(i => !BOTTOM_ROUTES.includes(i.route));
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
 }

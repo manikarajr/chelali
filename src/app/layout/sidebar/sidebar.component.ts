@@ -1,6 +1,7 @@
-import { Component, computed, input, output } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, computed, inject, input, output } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NAV_ITEMS } from './sidebar.config';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,6 +10,9 @@ import { NAV_ITEMS } from './sidebar.config';
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   readonly currentYear = new Date().getFullYear();
   isOpen = input(false);
   closed = output<void>();
@@ -19,4 +23,9 @@ export class SidebarComponent {
   ].join(' '));
 
   navItems = NAV_ITEMS;
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
 }
