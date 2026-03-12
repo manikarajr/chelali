@@ -1,9 +1,10 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { NgClass, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { NgClass, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { ExpenseService } from '../../core/services/expense.service';
 import { Expense } from '../../core/models/expense.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { ExpenseFormComponent } from './expense-form.component';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 
 const CATEGORY_COLORS: Record<string, string> = {
   electricity: 'bg-yellow-100 text-yellow-800',
@@ -15,24 +16,23 @@ const CATEGORY_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, DatePipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent, DataTableComponent],
   templateUrl: './expense-list.component.html',
 })
 export class ExpenseListComponent {
   private expenseService = inject(ExpenseService);
 
   expenses = this.expenseService.expenses;
-  searchQuery = signal('');
   isPanelOpen = signal(false);
   editingExpense = signal<Expense | null>(null);
 
-  filtered = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    if (!q) return this.expenses();
-    return this.expenses().filter(e =>
-      e.category.includes(q) || e.notes.toLowerCase().includes(q)
-    );
-  });
+  columns: TableColumn[] = [
+    { key: 'category', label: 'Category', type: 'status' },
+    { key: 'date', label: 'Date', type: 'date', className: 'text-gray-500', hiddenSm: true },
+    { key: 'amount', label: 'Amount', type: 'currency', className: 'text-right font-semibold text-gray-900' },
+    { key: 'notes', label: 'Notes', className: 'text-gray-500 max-w-xs truncate', hiddenMd: true },
+    { key: 'actions', label: 'Actions', type: 'actions', className: 'text-center' }
+  ];
 
   categorySummary = computed(() => {
     const cats = ['electricity', 'labour', 'maintenance', 'transport'];

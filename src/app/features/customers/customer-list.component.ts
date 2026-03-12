@@ -4,30 +4,30 @@ import { CustomerService } from '../../core/services/customer.service';
 import { Customer } from '../../core/models/customer.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { CustomerFormComponent } from './customer-form.component';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [NgClass, DecimalPipe, SlidePanelComponent, CustomerFormComponent],
+  imports: [NgClass, SlidePanelComponent, CustomerFormComponent, DataTableComponent],
   templateUrl: './customer-list.component.html',
 })
 export class CustomerListComponent {
   private customerService = inject(CustomerService);
 
   customers = this.customerService.customers;
-  searchQuery = signal('');
   isPanelOpen = signal(false);
   editingCustomer = signal<Customer | null>(null);
 
-  filtered = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    if (!q) return this.customers();
-    return this.customers().filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.phone.includes(q) ||
-      c.address.toLowerCase().includes(q)
-    );
-  });
+  columns: TableColumn[] = [
+    { key: 'index', label: '#', type: 'index' },
+    { key: 'name', label: 'Name', className: 'font-medium text-gray-900' },
+    { key: 'phone', label: 'Phone', className: 'text-gray-600' },
+    { key: 'address', label: 'Address', className: 'text-gray-500 max-w-xs truncate', hiddenMd: true },
+    { key: 'openingBalance', label: 'Opening Balance', type: 'currency', className: 'text-right text-gray-700', hiddenSm: true },
+    { key: 'status', label: 'Status', type: 'status', className: 'text-center' },
+    { key: 'actions', label: 'Actions', type: 'actions', className: 'text-center' }
+  ];
 
   openAdd(): void {
     this.editingCustomer.set(null);

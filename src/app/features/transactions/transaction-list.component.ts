@@ -1,15 +1,16 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { NgClass, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { NgClass, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { TransactionService } from '../../core/services/transaction.service';
 import { CustomerService } from '../../core/services/customer.service';
 import { Transaction } from '../../core/models/transaction.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { TransactionFormComponent } from './transaction-form.component';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, DatePipe, TitleCasePipe, SlidePanelComponent, TransactionFormComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, TransactionFormComponent, DataTableComponent],
   templateUrl: './transaction-list.component.html',
 })
 export class TransactionListComponent {
@@ -18,17 +19,20 @@ export class TransactionListComponent {
 
   transactions = this.txService.transactions;
   customers = this.customerService.customers;
-  searchQuery = signal('');
   isPanelOpen = signal(false);
   editingTransaction = signal<Transaction | null>(null);
 
-  filtered = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    if (!q) return this.transactions();
-    return this.transactions().filter(t =>
-      this.customerName(t.customerId).toLowerCase().includes(q)
-    );
-  });
+  columns: TableColumn[] = [
+    { key: 'customerId', label: 'Customer', className: 'font-medium text-gray-900' },
+    { key: 'date', label: 'Date', type: 'date', className: 'text-gray-500', hiddenSm: true },
+    { key: 'quantity', label: 'Qty (kg)', type: 'number', className: 'text-right text-gray-700', hiddenMd: true },
+    { key: 'unitPrice', label: 'Unit Price', type: 'currency', className: 'text-right text-gray-700', hiddenMd: true },
+    { key: 'totalAmount', label: 'Total', type: 'currency', className: 'text-right font-medium text-gray-900' },
+    { key: 'paidAmount', label: 'Paid', type: 'currency', className: 'text-right text-green-600', hiddenSm: true },
+    { key: 'outstandingAmount', label: 'Outstanding', type: 'currency', className: 'text-right font-semibold' },
+    { key: 'paymentStatus', label: 'Status', type: 'status', className: 'text-center' },
+    { key: 'actions', label: 'Actions', type: 'actions', className: 'text-center' }
+  ];
 
   customerName(id: number): string {
     return this.customerService.getById(id)?.name ?? 'Unknown';

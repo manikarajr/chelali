@@ -6,11 +6,12 @@ import { CustomerService } from '../../core/services/customer.service';
 import { Invoice } from '../../core/models/invoice.model';
 import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-panel.component';
 import { InvoiceViewComponent } from './invoice-view.component';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, DatePipe, FormsModule, SlidePanelComponent, InvoiceViewComponent],
+  imports: [NgClass, CurrencyPipe, DatePipe, FormsModule, SlidePanelComponent, InvoiceViewComponent, DataTableComponent],
   templateUrl: './invoice-list.component.html',
 })
 export class InvoiceListComponent {
@@ -19,7 +20,6 @@ export class InvoiceListComponent {
 
   invoices = this.invoiceService.invoices;
   customers = this.customerService.customers;
-  searchQuery = signal('');
   isPanelOpen = signal(false);
   selectedInvoice = signal<Invoice | null>(null);
   selectedCustomer = signal<any>(null);
@@ -29,14 +29,14 @@ export class InvoiceListComponent {
   newInvStart = '';
   newInvEnd = '';
 
-  filtered = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    if (!q) return this.invoices();
-    return this.invoices().filter(i =>
-      i.invoiceNumber.toLowerCase().includes(q) ||
-      this.customerName(i.customerId).toLowerCase().includes(q)
-    );
-  });
+  columns: TableColumn[] = [
+    { key: 'invoiceNumber', label: 'Invoice #', className: 'font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-700' },
+    { key: 'customerId', label: 'Customer', className: 'font-medium text-gray-900' },
+    { key: 'billingPeriod', label: 'Billing Period', className: 'text-gray-500', hiddenSm: true },
+    { key: 'totalAmount', label: 'Total', type: 'currency', className: 'text-right font-medium text-gray-900' },
+    { key: 'outstandingAmount', label: 'Outstanding', type: 'currency', className: 'text-right font-semibold' },
+    { key: 'actions', label: 'Actions', type: 'actions', className: 'text-center' }
+  ];
 
   customerName(id: number): string {
     return this.customerService.getById(id)?.name ?? 'Unknown';

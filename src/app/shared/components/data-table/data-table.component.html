@@ -1,0 +1,193 @@
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-4">
+  <!-- Search -->
+  <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="relative w-full sm:max-w-xs">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+           stroke="currentColor"
+           class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z" />
+      </svg>
+      <input
+        type="text"
+        [placeholder]="searchPlaceholder()"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+        class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+    
+    <div class="text-xs text-gray-500">
+      @if (filteredData().length > 0) {
+        Showing {{ startIndex() }} to {{ endIndex() }} of {{ filteredData().length }} entries
+      }
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wide">
+        <tr>
+          @for (col of columns(); track col.key) {
+            <th 
+              [class]="col.headerClassName || ''"
+              [ngClass]="{
+                'px-4 py-3 font-semibold': true,
+                'hidden md:table-cell': col.hiddenMd,
+                'hidden sm:table-cell': col.hiddenSm,
+                'text-left': !col.className?.includes('text-right') && !col.className?.includes('text-center'),
+                'text-right': col.className?.includes('text-right'),
+                'text-center': col.className?.includes('text-center')
+              }"
+            >
+              {{ col.label }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        @for (item of paginatedData(); track item.id; let i = $index) {
+          <tr class="hover:bg-gray-50 transition-colors">
+            @for (col of columns(); track col.key) {
+              <td 
+                [class]="col.className || ''"
+                [ngClass]="{
+                  'px-4 py-3': true,
+                  'hidden md:table-cell': col.hiddenMd,
+                  'hidden sm:table-cell': col.hiddenSm
+                }"
+              >
+                @switch (col.type) {
+                  @case ('index') {
+                    <span class="text-gray-400">{{ startIndex() + i }}</span>
+                  }
+                  @case ('currency') {
+                    {{ item[col.key] | currency:'INR':'symbol':'1.0-0' }}
+                  }
+                  @case ('number') {
+                    {{ item[col.key] | number }}
+                  }
+                  @case ('date') {
+                    {{ item[col.key] | date:'dd MMM yyyy' }}
+                  }
+                  @case ('status') {
+                    @if (statusTemplate()) {
+                      <ng-container [ngTemplateOutlet]="statusTemplate()!" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    } @else {
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            [ngClass]="item[col.key] === 'active' || item[col.key] === 'paid'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-600'">
+                        {{ item[col.key] | titlecase }}
+                      </span>
+                    }
+                  }
+                  @case ('actions') {
+                    @if (actionTemplate()) {
+                      <ng-container [ngTemplateOutlet]="actionTemplate()!" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    }
+                  }
+                  @default {
+                    @if (customCellTemplate()) {
+                        <ng-container [ngTemplateOutlet]="customCellTemplate()!" [ngTemplateOutletContext]="{ $implicit: item, column: col }"></ng-container>
+                    } @else {
+                        {{ item[col.key] }}
+                    }
+                  }
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="columns().length" class="px-4 py-12 text-center text-gray-400">
+              <div class="flex flex-col items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-10 h-10 mb-2 text-gray-300">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25-2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                {{ noDataMessage() }}
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Footer -->
+  @if (totalPages() > 1) {
+    <div class="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button
+          (click)="prevPage()"
+          [disabled]="currentPage() === 1"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs text-gray-500">
+            Page <span class="font-medium text-gray-700">{{ currentPage() }}</span> of <span class="font-medium text-gray-700">{{ totalPages() }}</span>
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage() === 1"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span class="sr-only">Previous</span>
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            
+            <!-- Simple page numbers -->
+            @for (p of [].constructor(totalPages()); track $index) {
+                @if ($index + 1 === 1 || $index + 1 === totalPages() || ($index + 1 >= currentPage() - 1 && $index + 1 <= currentPage() + 1)) {
+                    <button
+                        (click)="setPage($index + 1)"
+                        [class.bg-blue-50]="currentPage() === $index + 1"
+                        [class.text-blue-600]="currentPage() === $index + 1"
+                        [class.border-blue-500]="currentPage() === $index + 1"
+                        [class.z-10]="currentPage() === $index + 1"
+                        class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+                    >
+                        {{ $index + 1 }}
+                    </button>
+                } @else if (($index + 1 === 2 && currentPage() > 3) || ($index + 1 === totalPages() - 1 && currentPage() < totalPages() - 2)) {
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        ...
+                    </span>
+                }
+            }
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span class="sr-only">Next</span>
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  }
+</div>
