@@ -34,10 +34,10 @@
     </ng-template>
 
     <ng-template #actions let-inv>
-      <div class="flex items-center justify-center gap-2">
+      <div class="flex items-center justify-center gap-1">
         <!-- View -->
         <button (click)="viewInvoice(inv)"
-          class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="View">
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="View">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +48,7 @@
 
         <!-- WhatsApp -->
         <a [href]="whatsappLink(inv)" target="_blank" rel="noopener noreferrer"
-          class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
           title="Send WhatsApp">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" class="w-4 h-4">
@@ -81,7 +81,7 @@
 
         <!-- Delete -->
         <button (click)="delete(inv.id)"
-          class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Delete">
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Delete">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round"
@@ -114,7 +114,7 @@
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-6">
     <div class="flex items-center justify-between">
       <h3 class="text-xl font-bold text-gray-900">Generate Invoice</h3>
-      <button (click)="showCreateModal.set(false)" class="text-gray-400 hover:text-gray-600">
+      <button (click)="showCreateModal.set(false)" class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-md transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -150,7 +150,7 @@
       </div>
 
       <!-- Date Fields -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Start Date</label>
           <input type="date" [ngModel]="newInvStart()" (ngModelChange)="newInvStart.set($event)"

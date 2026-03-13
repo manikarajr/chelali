@@ -36,10 +36,10 @@
     </ng-template>
 
     <ng-template #actions let-customer>
-      <div class="flex items-center justify-center gap-2">
+      <div class="flex items-center justify-center gap-1">
         <button
           (click)="openEdit(customer)"
-          class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
           title="Edit"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -50,7 +50,7 @@
         </button>
         <button
           (click)="delete(customer.id)"
-          class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
           title="Delete"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

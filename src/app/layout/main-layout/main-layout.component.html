@@ -39,7 +39,7 @@
 
   <!-- Hamburger slide-up drawer -->
   <div
-    class="lg:hidden fixed bottom-16 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-xl border-t border-gray-200 transition-transform duration-300 ease-in-out"
+    class="lg:hidden fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-50 bg-white rounded-t-2xl shadow-xl border-t border-gray-200 transition-transform duration-300 ease-in-out"
     [class.translate-y-0]="hamburgerOpen()"
     [class.translate-y-full]="!hamburgerOpen()"
   >
@@ -76,11 +76,11 @@
         </button>
       </div>
     </div>
-    <div class="h-safe-area-inset-bottom pb-2"></div>
+    <div class="pb-safe"></div>
   </div>
 
   <!-- Mobile bottom navbar -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex">
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex pb-safe">
     @for (item of bottomNavItems; track item.route) {
       <a
         [routerLink]="item.route"

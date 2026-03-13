@@ -11,7 +11,7 @@
     ></div>
 
     <!-- Modal -->
-    <div class="relative z-10 w-full max-w-sm bg-white rounded-xl shadow-xl p-6 space-y-4">
+    <div class="relative z-10 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-xl shadow-xl p-6 space-y-4">
       <!-- Icon -->
       @if (confirmVariant() === 'success') {
         <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full bg-green-100">
@@ -41,8 +41,8 @@
         <button
           type="button"
           (click)="cancelled.emit()"
-          class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300
-                 rounded-lg hover:bg-gray-50 transition-colors"
+          class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300
+                 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
         >
           {{ cancelLabel() }}
         </button>
@@ -50,19 +50,19 @@
           <button
             type="button"
             (click)="confirmed.emit()"
-            class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >{{ confirmLabel() }}</button>
         } @else if (confirmVariant() === 'success') {
           <button
             type="button"
             (click)="confirmed.emit()"
-            class="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+            class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
           >{{ confirmLabel() }}</button>
         } @else {
           <button
             type="button"
             (click)="confirmed.emit()"
-            class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+            class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >{{ confirmLabel() }}</button>
         }
       </div>

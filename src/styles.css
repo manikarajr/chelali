@@ -11,7 +11,12 @@
     @apply box-border;
   }
 
-  /* Smooth scrollbar */
+  /* Prevent iOS tap highlight flash */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrollbar (Chrome/Edge/Safari) */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -28,6 +33,39 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
   }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
+  }
+
+  /* iOS input zoom prevention — inputs must be at least 16px font-size */
+  @supports (-webkit-touch-callout: none) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* iOS safe-area bottom padding */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Minimum 44×44px touch target (WCAG 2.5.5) */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    @apply flex items-center justify-center;
+  }
 }
 
 /* Print styles for invoices */
@@ -41,5 +79,12 @@
   main {
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  /* Remove gradients & backgrounds for print readability */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
   }
 }
