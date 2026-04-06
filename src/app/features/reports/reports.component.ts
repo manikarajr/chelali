@@ -42,6 +42,7 @@ export class ReportsComponent {
   activeTab = signal<ReportTab>('sales');
   filterType = 'monthly';
   selectedMonth = new Date().toISOString().slice(0, 7);
+  selectedYear = new Date().getFullYear();
   dateFrom = '';
   dateTo = '';
 
@@ -81,6 +82,9 @@ export class ReportsComponent {
     if (this.filterType === 'monthly') {
       const [y, m] = this.selectedMonth.split('-').map(Number);
       return d.getFullYear() === y && d.getMonth() + 1 === m;
+    }
+    if (this.filterType === 'annual') {
+      return d.getFullYear() === Number(this.selectedYear);
     }
     const from = this.dateFrom ? new Date(this.dateFrom) : null;
     const to = this.dateTo ? new Date(this.dateTo) : null;
@@ -148,6 +152,9 @@ export class ReportsComponent {
       const [y, m] = this.selectedMonth.split('-');
       const date = new Date(Number(y), Number(m) - 1, 1);
       return date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    }
+    if (this.filterType === 'annual') {
+      return String(this.selectedYear);
     }
     return `${this.dateFrom || 'Start'} to ${this.dateTo || 'End'}`;
   }
