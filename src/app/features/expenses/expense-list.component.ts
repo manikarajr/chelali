@@ -6,6 +6,7 @@ import { SlidePanelComponent } from '../../shared/components/slide-panel/slide-p
 import { ExpenseFormComponent } from './expense-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { EmployeeExpenseTabComponent } from './employee-expense-tab.component';
 
 const CATEGORY_COLORS: Record<string, string> = {
   electricity: 'bg-yellow-100 text-yellow-800',
@@ -17,11 +18,13 @@ const CATEGORY_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent, DataTableComponent, ConfirmDialogComponent],
+  imports: [NgClass, CurrencyPipe, TitleCasePipe, SlidePanelComponent, ExpenseFormComponent, DataTableComponent, ConfirmDialogComponent, EmployeeExpenseTabComponent],
   templateUrl: './expense-list.component.html',
 })
 export class ExpenseListComponent {
   private expenseService = inject(ExpenseService);
+
+  activeTab = signal<'expenses' | 'employee-expenses'>('expenses');
 
   expenses = this.expenseService.expenses;
   isPanelOpen = signal(false);

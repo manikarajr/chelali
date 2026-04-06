@@ -1,0 +1,211 @@
+<div class="space-y-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <p class="text-sm text-gray-500">Record salary, advance, and allowance payments</p>
+    <div class="flex items-center gap-2">
+      <button
+        (click)="isEmployeePanelOpen.set(true)"
+        class="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium
+               rounded-lg hover:bg-gray-50 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952
+               4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07
+               M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766
+               l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0
+               3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+        </svg>
+        <span class="hidden sm:inline">Manage Employees</span>
+        <span class="sm:hidden">Employees</span>
+      </button>
+      <button
+        (click)="openAdd()"
+        class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm font-medium
+               rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span class="hidden sm:inline">Add Payment</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Monthly Summary Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-gray-500 mb-1">Salary (this month)</p>
+      <p class="text-lg font-bold text-gray-900">{{ monthlySummary().salary | currency:'INR':'symbol':'1.0-0' }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-gray-500 mb-1">Advances (this month)</p>
+      <p class="text-lg font-bold text-orange-600">{{ monthlySummary().advance | currency:'INR':'symbol':'1.0-0' }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-gray-500 mb-1">Allowances (this month)</p>
+      <p class="text-lg font-bold text-green-600">{{ monthlySummary().allowance | currency:'INR':'symbol':'1.0-0' }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-gray-500 mb-1">Total Paid (this month)</p>
+      <p class="text-lg font-bold text-blue-600">{{ monthlySummary().total | currency:'INR':'symbol':'1.0-0' }}</p>
+    </div>
+  </div>
+
+  <!-- Payment History Table -->
+  <app-data-table
+    [data]="enrichedExpenses()"
+    [columns]="columns"
+    searchPlaceholder="Search payments…"
+    noDataMessage="No payments recorded yet."
+  >
+    <ng-template #status let-e>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [ngClass]="paymentTypeColor(e.paymentType)">
+        {{ e.paymentType | titlecase }}
+      </span>
+    </ng-template>
+
+    <ng-template #actions let-e>
+      <div class="flex items-center justify-center gap-1">
+        <button
+          (click)="openEdit(e)"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400
+                 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+          title="Edit"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+          </svg>
+        </button>
+        <button
+          (click)="delete(e.id)"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400
+                 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+          title="Delete"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+          </svg>
+        </button>
+      </div>
+    </ng-template>
+  </app-data-table>
+
+  <!-- Monthly Employee Report -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-100">
+      <h3 class="text-sm font-semibold text-gray-800">Monthly Salary Report</h3>
+      <p class="text-xs text-gray-400 mt-0.5">Current month breakdown per employee</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+            <th class="px-4 py-2 text-left font-medium">Employee</th>
+            <th class="px-4 py-2 text-right font-medium">Basic Salary</th>
+            <th class="px-4 py-2 text-right font-medium">+ Allowances</th>
+            <th class="px-4 py-2 text-right font-medium">− Advances</th>
+            <th class="px-4 py-2 text-right font-medium">Paid</th>
+            <th class="px-4 py-2 text-right font-medium">Net Payable</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (row of employeeReport(); track row.emp.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3">
+                <div class="font-medium text-gray-900">{{ row.emp.name }}</div>
+                <div class="text-xs mt-0.5"
+                     [ngClass]="row.emp.status === 'active' ? 'text-green-600' : 'text-gray-400'">
+                  {{ row.emp.status | titlecase }}
+                </div>
+              </td>
+              <td class="px-4 py-3 text-right text-gray-600">
+                {{ row.emp.basicSalary | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="px-4 py-3 text-right text-green-600">
+                {{ row.allowance | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="px-4 py-3 text-right text-orange-600">
+                {{ row.advance | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="px-4 py-3 text-right text-gray-600">
+                {{ row.salary | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="px-4 py-3 text-right font-semibold"
+                  [ngClass]="row.netPayable > 0 ? 'text-blue-700' : row.netPayable < 0 ? 'text-red-600' : 'text-gray-500'">
+                {{ row.netPayable | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+            </tr>
+          }
+          @if (employeeReport().length === 0) {
+            <tr>
+              <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">No employees found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Advance Warning Dialog -->
+<app-confirm-dialog
+  [isOpen]="isAdvanceWarningOpen()"
+  title="Advance Limit Exceeded"
+  [message]="advanceWarningMessage()"
+  confirmLabel="Proceed Anyway"
+  confirmVariant="primary"
+  cancelLabel="Cancel"
+  (confirmed)="onAdvanceWarningConfirmed()"
+  (cancelled)="isAdvanceWarningOpen.set(false); pendingSaveData.set(null)"
+></app-confirm-dialog>
+
+<!-- Confirm Save Dialog -->
+<app-confirm-dialog
+  [isOpen]="isConfirmSaveOpen()"
+  [title]="pendingSaveData()?.id !== undefined ? 'Update Payment' : 'Record Payment'"
+  [message]="pendingSaveData()?.id !== undefined ? 'Save changes to this payment?' : 'Record this new payment?'"
+  [confirmLabel]="pendingSaveData()?.id !== undefined ? 'Update' : 'Record'"
+  [confirmVariant]="pendingSaveData()?.id !== undefined ? 'primary' : 'success'"
+  (confirmed)="confirmSave()"
+  (cancelled)="cancelSave()"
+></app-confirm-dialog>
+
+<!-- Confirm Delete Dialog -->
+<app-confirm-dialog
+  [isOpen]="deleteTargetId() !== null"
+  title="Delete Payment"
+  message="Are you sure you want to delete this payment record? This action cannot be undone."
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+></app-confirm-dialog>
+
+<!-- Payment Form Slide Panel -->
+<app-slide-panel
+  [isOpen]="isPanelOpen()"
+  [title]="editingExpense() ? 'Edit Payment' : 'Record Payment'"
+  (closed)="closePanel()"
+>
+  <app-employee-payment-form
+    [expense]="editingExpense()"
+    [employees]="activeEmployees()"
+    (saved)="onFormSaved($event)"
+    (cancelled)="closePanel()"
+  ></app-employee-payment-form>
+</app-slide-panel>
+
+<!-- Employee Management Slide Panel -->
+<app-slide-panel
+  [isOpen]="isEmployeePanelOpen()"
+  title="Manage Employees"
+  (closed)="isEmployeePanelOpen.set(false)"
+>
+  <app-employee-management-panel></app-employee-management-panel>
+</app-slide-panel>

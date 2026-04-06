@@ -1,78 +1,116 @@
 <div class="space-y-4">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Expenses</h2>
-      <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Track operational expenses</p>
+  <!-- Page Header -->
+  <div>
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Expenses</h2>
+    <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Track and manage all expenses</p>
+  </div>
+
+  <!-- Tab Switcher -->
+  <div class="border-b border-gray-200">
+    <nav class="-mb-px flex">
+      <button
+        (click)="activeTab.set('expenses')"
+        class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2"
+        [class.border-blue-600]="activeTab() === 'expenses'"
+        [class.text-blue-600]="activeTab() === 'expenses'"
+        [class.border-transparent]="activeTab() !== 'expenses'"
+        [class.text-gray-500]="activeTab() !== 'expenses'"
+        [class.hover:text-gray-700]="activeTab() !== 'expenses'"
+      >
+        Expenses
+      </button>
+      <button
+        (click)="activeTab.set('employee-expenses')"
+        class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2"
+        [class.border-blue-600]="activeTab() === 'employee-expenses'"
+        [class.text-blue-600]="activeTab() === 'employee-expenses'"
+        [class.border-transparent]="activeTab() !== 'employee-expenses'"
+        [class.text-gray-500]="activeTab() !== 'employee-expenses'"
+        [class.hover:text-gray-700]="activeTab() !== 'employee-expenses'"
+      >
+        Employee Expenses
+      </button>
+    </nav>
+  </div>
+
+  <!-- General Expenses Tab -->
+  @if (activeTab() === 'expenses') {
+    <!-- Header with Add button -->
+    <div class="flex items-center justify-between">
+      <div></div>
+      <button
+        (click)="openAdd()"
+        class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm font-medium
+               rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span class="hidden sm:inline">Add Expense</span>
+      </button>
     </div>
-    <button
-      (click)="openAdd()"
-      class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm font-medium
-             rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0"
+
+    <!-- Summary row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      @for (cat of categorySummary(); track cat.label) {
+        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+          <p class="text-xs text-gray-500 mb-1">{{ cat.label }}</p>
+          <p class="text-lg font-bold text-gray-900">{{ cat.total | currency:'INR':'symbol':'1.0-0' }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Table Card -->
+    <app-data-table
+      [data]="expenses()"
+      [columns]="columns"
+      searchPlaceholder="Search expenses..."
+      noDataMessage="No expenses found."
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-           stroke="currentColor" class="w-4 h-4">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-      </svg>
-      <span class="hidden sm:inline">Add Expense</span>
-    </button>
-  </div>
+      <ng-template #status let-e>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              [ngClass]="categoryColor(e.category)">
+          {{ e.category | titlecase }}
+        </span>
+      </ng-template>
 
-  <!-- Summary row -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-    @for (cat of categorySummary(); track cat.label) {
-      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-        <p class="text-xs text-gray-500 mb-1">{{ cat.label }}</p>
-        <p class="text-lg font-bold text-gray-900">{{ cat.total | currency:'INR':'symbol':'1.0-0' }}</p>
-      </div>
-    }
-  </div>
+      <ng-template #actions let-e>
+        <div class="flex items-center justify-center gap-1">
+          <button
+            (click)="openEdit(e)"
+            class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            title="Edit"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+            </svg>
+          </button>
+          <button
+            (click)="delete(e.id)"
+            class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </button>
+        </div>
+      </ng-template>
+    </app-data-table>
+  }
 
-  <!-- Table Card -->
-  <app-data-table
-    [data]="expenses()"
-    [columns]="columns"
-    searchPlaceholder="Search expenses..."
-    noDataMessage="No expenses found."
-  >
-    <!-- Custom Templates -->
-    <ng-template #status let-e>
-      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-            [ngClass]="categoryColor(e.category)">
-        {{ e.category | titlecase }}
-      </span>
-    </ng-template>
-
-    <ng-template #actions let-e>
-      <div class="flex items-center justify-center gap-1">
-        <button
-          (click)="openEdit(e)"
-          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-          title="Edit"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-               stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-          </svg>
-        </button>
-        <button
-          (click)="delete(e.id)"
-          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-          title="Delete"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-               stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-          </svg>
-        </button>
-      </div>
-    </ng-template>
-  </app-data-table>
+  <!-- Employee Expenses Tab -->
+  @if (activeTab() === 'employee-expenses') {
+    <app-employee-expense-tab></app-employee-expense-tab>
+  }
 </div>
 
-<!-- Confirm Save Dialog -->
+<!-- General Expense Dialogs & Panel -->
 <app-confirm-dialog
   [isOpen]="isConfirmSaveOpen()"
   [title]="pendingSaveData()?.id !== undefined ? 'Update Expense' : 'Add Expense'"
@@ -83,7 +121,6 @@
   (cancelled)="cancelSave()"
 ></app-confirm-dialog>
 
-<!-- Confirm Delete Dialog -->
 <app-confirm-dialog
   [isOpen]="deleteTargetId() !== null"
   title="Delete Expense"
@@ -92,7 +129,6 @@
   (cancelled)="cancelDelete()"
 ></app-confirm-dialog>
 
-<!-- Slide Panel -->
 <app-slide-panel
   [isOpen]="isPanelOpen()"
   [title]="editingExpense() ? 'Edit Expense' : 'Add Expense'"
